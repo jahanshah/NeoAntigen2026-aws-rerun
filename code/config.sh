@@ -9,7 +9,9 @@
 export BASE_DIR="/home/ec2-user"
 export CODE_DIR="${BASE_DIR}/code"
 export REF_DIR="${BASE_DIR}/ref/mm10"
-export TMP_DIR="/tmp/neoantig_pipeline"
+# Use /scratch if available (500GB EBS scratch volume — see setup_scratch_volume.sh)
+# Fall back to /tmp (15GB tmpfs) — safe for sequential runs, too small for parallel
+export TMP_DIR="${TMP_DIR:-$( [[ -d /scratch ]] && echo /scratch/neoantig_pipeline || echo /tmp/neoantig_pipeline )}"
 
 # --- Reference ---------------------------------------------------------------
 export REF="${REF_DIR}/mm10.fa"
@@ -64,8 +66,13 @@ export MHC_ALLELES="H-2-Kb,H-2-Db"
 export PEPTIDE_LENGTHS="8,9,10"
 
 # --- Runtime -----------------------------------------------------------------
-export THREADS=4
-export JAVA_OPTS="-Xmx12g"
+# Instance sizing guide:
+#   r5.xlarge  (4 vCPU,  32GB):  THREADS=3,  JAVA_OPTS="-Xmx12g"
+#   r5.2xlarge (8 vCPU,  64GB):  THREADS=6,  JAVA_OPTS="-Xmx24g"
+#   r5.4xlarge (16 vCPU, 128GB): THREADS=12, JAVA_OPTS="-Xmx40g"
+#   Current:   16 vCPU, 30GB EBS root + /scratch EBS volume
+export THREADS=12
+export JAVA_OPTS="-Xmx20g"
 
 # --- Utility functions -------------------------------------------------------
 log()  { echo "[$(date '+%H:%M:%S')] $*"; }

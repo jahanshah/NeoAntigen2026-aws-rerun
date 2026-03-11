@@ -37,7 +37,20 @@ Then update `code/config.sh` if your paths differ from defaults (see comments in
 
 ---
 
-## 3. Install Dependencies & Download References
+## 3. Add Scratch Volume (Recommended)
+
+Attach a 500GB gp3 EBS volume for pipeline temp files. This is **required for parallel processing** and prevents disk-full errors on large BAMs:
+
+```bash
+# After attaching the volume in AWS Console (or with aws ec2 attach-volume):
+sudo bash setup_scratch_volume.sh
+```
+
+The pipeline auto-detects `/scratch` at startup. Without it, temp files go to `/tmp` (15GB tmpfs — sequential only).
+
+---
+
+## 4. Install Dependencies & Download References
 
 Run once per new instance:
 
@@ -53,7 +66,7 @@ It also downloads the mm10 reference FASTA, exon BED, and MGP SNPs for BQSR — 
 
 ---
 
-## 4. S3 Data Layout
+## 5. S3 Data Layout
 
 ```
 s3://neoantigen2026-rerun/
@@ -66,7 +79,7 @@ s3://neoantigen2026-rerun/
 
 ---
 
-## 5. Samples
+## 6. Samples
 
 | Sample | Role | Timepoint |
 |---|---|---|
@@ -80,7 +93,7 @@ s3://neoantigen2026-rerun/
 
 ---
 
-## 6. Run the Full Pipeline
+## 7. Run the Full Pipeline
 
 ```bash
 bash code/run_pipeline.sh
@@ -103,6 +116,13 @@ bash code/run_pipeline.sh 3 7    # run steps 3 to 7 only
 bash code/steps/01_bam_preprocess.sh
 ```
 
+### Parallel BAM preprocessing (with /scratch volume)
+
+```bash
+# Process 3 samples concurrently — requires /scratch EBS volume (≥300GB free)
+PARALLEL_JOBS=3 bash code/steps/01_bam_preprocess.sh
+```
+
 > When running a single step directly, a new `RUN_ID` is auto-generated.
 > To continue an existing run, export the same ID first:
 > ```bash
@@ -112,7 +132,7 @@ bash code/steps/01_bam_preprocess.sh
 
 ---
 
-## 7. Pipeline Steps
+## 8. Pipeline Steps
 
 | Step | Script | Description |
 |---|---|---|
@@ -141,7 +161,7 @@ Skip or reprocess? [s=skip / r=reprocess]:
 
 ---
 
-## 8. Monitor a Running Job
+## 9. Monitor a Running Job
 
 ```bash
 # Follow the preprocessing log
@@ -156,7 +176,7 @@ aws s3 ls s3://neoantigen2026-rerun/results/res_<RUN_ID>/ --recursive
 
 ---
 
-## 9. Find Results
+## 10. Find Results
 
 ### List all runs
 ```bash
@@ -188,7 +208,7 @@ aws s3 sync s3://neoantigen2026-rerun/results/${RUN_ID}/ ~/results/${RUN_ID}/
 
 ---
 
-## 10. Evaluate BAMs Before Running
+## 11. Evaluate BAMs Before Running
 
 To check all BAMs are suitable for Mutect2 and VarScan:
 
@@ -199,7 +219,7 @@ bash code/evaluate_bams_for_variant_calling.sh
 
 ---
 
-## 11. Push Results to GitHub
+## 12. Push Results to GitHub
 
 After a run completes, push reports, tables, figures, and HTML outputs to the repo:
 
@@ -234,3 +254,5 @@ bash push_results.sh res_20260311_184352 --from-s3
 | `netMHCpan not found` | Manual install required — see Step 3 note above |
 | `BQSR warning: no known SNPs` | Check `~/ref/mm10/mgp_snps.vcf.gz` exists; re-run `setup_pipeline.sh` |
 | Step fails mid-run | Re-run with `bash code/run_pipeline.sh <STEP>` after fixing the issue |
+| `Disk full / /tmp 100%` | Attach 500GB EBS and run `sudo bash setup_scratch_volume.sh`; clean `/tmp/neoantig_pipeline` first |
+| `ApplyBQSR produced no output` | Disk was full during BQSR; clean disk, re-run step |

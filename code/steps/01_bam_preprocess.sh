@@ -10,6 +10,11 @@
 # Each run also gets a reference copy at:
 #   s3://neoantigen2026-rerun/results/<RUN_ID>/preprocessed_bams/
 # (S3 copy — no extra storage cost for the run reference)
+#
+# Parallel processing:
+#   Set PARALLEL_JOBS=3 to process 3 samples concurrently.
+#   Requires /scratch EBS volume (≥300GB). See setup_scratch_volume.sh.
+#   Default: PARALLEL_JOBS=1 (sequential, safe on /tmp tmpfs).
 # =============================================================================
 
 set -euo pipefail
@@ -19,6 +24,15 @@ OUTDIR="${RESULTS_DIR}/preprocessed_bams"
 S3_PERMANENT="${S3_BAM_PREPROC}"          # permanent store — reused across runs
 S3_RUN_PREPROC="${S3_RESULTS}/preprocessed_bams"   # per-run reference copy
 mkdir -p "${OUTDIR}" "${TMP_DIR}/preproc"
+
+# Parallel jobs: 1=sequential (safe with /tmp); 3=parallel (needs /scratch)
+PARALLEL_JOBS="${PARALLEL_JOBS:-1}"
+if [[ "${PARALLEL_JOBS}" -gt 1 ]] && [[ "${TMP_DIR}" == /tmp/* ]]; then
+    log "[WARN] PARALLEL_JOBS=${PARALLEL_JOBS} requested but TMP_DIR is on /tmp (tmpfs)."
+    log "[WARN] This may cause disk-full errors. Mount /scratch first (see setup_scratch_volume.sh)."
+    log "[WARN] Falling back to PARALLEL_JOBS=1."
+    PARALLEL_JOBS=1
+fi
 
 ALL_SAMPLES=("${NORMAL_SAMPLE}" "${PON_NORMALS[1]}" "${TUMOR_SAMPLES[@]}")
 
@@ -88,35 +102,33 @@ done
 echo ""
 
 # =============================================================================
-for SAMPLE in "${ALL_SAMPLES[@]}"; do
-    FINAL_BAM="${OUTDIR}/${SAMPLE}.preproc.bam"
-    S3_PERM_OUT="${S3_PERMANENT}/${SAMPLE}.preproc.bam"
-    S3_RUN_OUT="${S3_RUN_PREPROC}/${SAMPLE}.preproc.bam"
+# preprocess_one_sample: run all preprocessing steps for a single sample.
+# Called sequentially or in background depending on PARALLEL_JOBS.
+# =============================================================================
+preprocess_one_sample() {
+    local SAMPLE="$1"
+    local FINAL_BAM="${OUTDIR}/${SAMPLE}.preproc.bam"
+    local S3_PERM_OUT="${S3_PERMANENT}/${SAMPLE}.preproc.bam"
+    local S3_RUN_OUT="${S3_RUN_PREPROC}/${SAMPLE}.preproc.bam"
 
-    # --- Copy from permanent store to run results (no reprocessing) ----------
-    if [[ "${RUN_SAMPLE[${SAMPLE}]}" == "copy_only" ]]; then
-        log "Copying ${SAMPLE} from permanent store to run results..."
-        aws s3 cp "${S3_PERM_OUT}"              "${S3_RUN_OUT}"
-        aws s3 cp "${S3_PERM_OUT%.bam}.bai"     "${S3_RUN_OUT%.bam}.bai" 2>/dev/null || true
-        aws s3 cp "${S3_PERM_OUT%.bam}.bam.bai" "${S3_RUN_OUT%.bam}.bam.bai" 2>/dev/null || true
-        log "  Done: ${SAMPLE} (copied)"
-        continue
-    fi
-
-    if [[ "${RUN_SAMPLE[${SAMPLE}]}" == "no" ]]; then
-        skip "${SAMPLE} (user chose to skip)"
-        continue
-    fi
+    local LOCAL_RAW="${TMP_DIR}/preproc/${SAMPLE}.bam"
+    local LOCAL_SORTED="${TMP_DIR}/preproc/${SAMPLE}.sorted.bam"
+    local LOCAL_DEDUP="${TMP_DIR}/preproc/${SAMPLE}.dedup.bam"
+    local METRICS="${OUTDIR}/${SAMPLE}.dup_metrics.txt"
+    local RECAL_TABLE="${OUTDIR}/${SAMPLE}.recal.table"
 
     log "========================================"
     log "Preprocessing: ${SAMPLE}"
     log "========================================"
 
-    LOCAL_RAW="${TMP_DIR}/preproc/${SAMPLE}.bam"
-    LOCAL_SORTED="${TMP_DIR}/preproc/${SAMPLE}.sorted.bam"
-    LOCAL_DEDUP="${TMP_DIR}/preproc/${SAMPLE}.dedup.bam"
-    METRICS="${OUTDIR}/${SAMPLE}.dup_metrics.txt"
-    RECAL_TABLE="${OUTDIR}/${SAMPLE}.recal.table"
+    # --- Disk space check ----------------------------------------------------
+    local AVAIL_GB
+    AVAIL_GB=$(df -BG "${TMP_DIR}" | awk 'NR==2{gsub("G","",$4); print $4}')
+    if [[ "${AVAIL_GB}" -lt 12 ]]; then
+        log "[ERROR] Only ${AVAIL_GB}GB free in ${TMP_DIR} — need ≥12GB for ${SAMPLE}. Aborting."
+        return 1
+    fi
+    log "  Disk: ${AVAIL_GB}GB free in ${TMP_DIR}"
 
     # --- 1a. Download raw BAM ------------------------------------------------
     log "  Downloading from S3..."
@@ -124,6 +136,7 @@ for SAMPLE in "${ALL_SAMPLES[@]}"; do
     aws s3 cp "${S3_BAM}/${SAMPLE}.bam.bai" "${LOCAL_RAW}.bai"
 
     # --- 1b. Sort (coordinate) -----------------------------------------------
+    local SORT_ORDER
     SORT_ORDER=$(${SAMTOOLS} view -H "${LOCAL_RAW}" | awk '/^@HD/{
         for(i=1;i<=NF;i++) if($i~/^SO:/) {sub("SO:","",$i); print $i}}')
     if [[ "${SORT_ORDER}" == "coordinate" ]]; then
@@ -159,7 +172,7 @@ for SAMPLE in "${ALL_SAMPLES[@]}"; do
 
     # --- 1d. BQSR ------------------------------------------------------------
     log "  Running BaseRecalibrator..."
-    BQSR_ARGS="-R ${REF} -I ${LOCAL_DEDUP} -O ${RECAL_TABLE}"
+    local BQSR_ARGS="-R ${REF} -I ${LOCAL_DEDUP} -O ${RECAL_TABLE}"
     if [[ -f "${KNOWN_SNPS}" && ! -f "${KNOWN_SNPS}.missing" ]]; then
         BQSR_ARGS="${BQSR_ARGS} --known-sites ${KNOWN_SNPS}"
     else
@@ -174,12 +187,18 @@ for SAMPLE in "${ALL_SAMPLES[@]}"; do
         -R "${REF}" \
         -I "${LOCAL_DEDUP}" \
         --bqsr-recal-file "${RECAL_TABLE}" \
-        -O "${FINAL_BAM}" 2>&1 | grep -E "INFO  Prog" | tail -3 || true
+        -O "${FINAL_BAM}"
     rm -f "${LOCAL_DEDUP}" "${LOCAL_DEDUP}.bai" "${LOCAL_DEDUP%.bam}.bai"
+
+    # Verify output BAM was actually created
+    if [[ ! -s "${FINAL_BAM}" ]]; then
+        log "[ERROR] ApplyBQSR produced no output for ${SAMPLE} — aborting"
+        return 1
+    fi
 
     # --- 1e. ValidateSamFile -------------------------------------------------
     log "  Validating BAM..."
-    VALIDATE_OUT="${OUTDIR}/${SAMPLE}.validate.txt"
+    local VALIDATE_OUT="${OUTDIR}/${SAMPLE}.validate.txt"
     ${GATK} ${JAVA_OPTS:+--java-options "${JAVA_OPTS}"} ValidateSamFile \
         -I "${FINAL_BAM}" \
         -O "${VALIDATE_OUT}" \
@@ -203,7 +222,63 @@ for SAMPLE in "${ALL_SAMPLES[@]}"; do
 
     rm -f "${FINAL_BAM}" "${FINAL_BAM%.bam}.bai" "${FINAL_BAM}.bai"
     log "  Done: ${SAMPLE}"
+}
+
+# =============================================================================
+# Main dispatch loop — sequential or parallel depending on PARALLEL_JOBS
+# =============================================================================
+PIDS=()
+FAILED_SAMPLES=()
+
+for SAMPLE in "${ALL_SAMPLES[@]}"; do
+    FINAL_BAM="${OUTDIR}/${SAMPLE}.preproc.bam"
+    S3_PERM_OUT="${S3_PERMANENT}/${SAMPLE}.preproc.bam"
+    S3_RUN_OUT="${S3_RUN_PREPROC}/${SAMPLE}.preproc.bam"
+
+    # --- Copy from permanent store to run results (no reprocessing) ----------
+    if [[ "${RUN_SAMPLE[${SAMPLE}]}" == "copy_only" ]]; then
+        log "Copying ${SAMPLE} from permanent store to run results..."
+        aws s3 cp "${S3_PERM_OUT}"              "${S3_RUN_OUT}"
+        aws s3 cp "${S3_PERM_OUT%.bam}.bai"     "${S3_RUN_OUT%.bam}.bai" 2>/dev/null || true
+        aws s3 cp "${S3_PERM_OUT%.bam}.bam.bai" "${S3_RUN_OUT%.bam}.bam.bai" 2>/dev/null || true
+        log "  Done: ${SAMPLE} (copied)"
+        continue
+    fi
+
+    if [[ "${RUN_SAMPLE[${SAMPLE}]}" == "no" ]]; then
+        skip "${SAMPLE} (user chose to skip)"
+        continue
+    fi
+
+    if [[ "${PARALLEL_JOBS}" -gt 1 ]]; then
+        # Parallel: wait if at job limit
+        while [[ ${#PIDS[@]} -ge ${PARALLEL_JOBS} ]]; do
+            for i in "${!PIDS[@]}"; do
+                if ! kill -0 "${PIDS[$i]}" 2>/dev/null; then
+                    wait "${PIDS[$i]}" || FAILED_SAMPLES+=("${PIDS[$i]}")
+                    unset 'PIDS[$i]'
+                    PIDS=("${PIDS[@]}")
+                fi
+            done
+            sleep 5
+        done
+        preprocess_one_sample "${SAMPLE}" &
+        PIDS+=($!)
+    else
+        # Sequential
+        preprocess_one_sample "${SAMPLE}"
+    fi
 done
+
+# Wait for any remaining background jobs
+for PID in "${PIDS[@]}"; do
+    wait "${PID}" || FAILED_SAMPLES+=("${PID}")
+done
+
+if [[ ${#FAILED_SAMPLES[@]} -gt 0 ]]; then
+    log "[ERROR] The following samples failed: ${FAILED_SAMPLES[*]}"
+    exit 1
+fi
 
 log "Step 1 complete."
 log "  Permanent store : ${S3_PERMANENT}/"

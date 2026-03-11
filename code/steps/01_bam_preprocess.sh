@@ -2,15 +2,22 @@
 # =============================================================================
 # Step 1 — BAM Preprocessing
 # Sort → MarkDuplicates → BaseQualityScoreRecalibration → ValidateSamFile
-# Processes all 7 samples (normals + tumours) one at a time.
-# Input BAMs streamed from S3; preprocessed BAMs uploaded back to S3.
+#
+# Preprocessed BAMs are stored permanently at:
+#   s3://neoantigen2026-rerun/data/bam/wes/preprocessed/
+# and reused across runs without reprocessing.
+#
+# Each run also gets a reference copy at:
+#   s3://neoantigen2026-rerun/results/<RUN_ID>/preprocessed_bams/
+# (S3 copy — no extra storage cost for the run reference)
 # =============================================================================
 
 set -euo pipefail
 source /home/ec2-user/code/config.sh
 
 OUTDIR="${RESULTS_DIR}/preprocessed_bams"
-S3_PREPROC="${S3_RESULTS}/preprocessed_bams"
+S3_PERMANENT="${S3_BAM_PREPROC}"          # permanent store — reused across runs
+S3_RUN_PREPROC="${S3_RESULTS}/preprocessed_bams"   # per-run reference copy
 mkdir -p "${OUTDIR}" "${TMP_DIR}/preproc"
 
 ALL_SAMPLES=("${NORMAL_SAMPLE}" "${PON_NORMALS[1]}" "${TUMOR_SAMPLES[@]}")
@@ -19,17 +26,22 @@ ALL_SAMPLES=("${NORMAL_SAMPLE}" "${PON_NORMALS[1]}" "${TUMOR_SAMPLES[@]}")
 log "========================================"
 log "Checking preprocessing status for all samples..."
 log "========================================"
-declare -A SAMPLE_STATUS   # "done_s3" | "done_local" | "new"
+declare -A SAMPLE_STATUS   # "done_permanent" | "done_run" | "done_local" | "new"
 declare -A SAMPLE_INFO
 
 for SAMPLE in "${ALL_SAMPLES[@]}"; do
-    S3_OUT="${S3_PREPROC}/${SAMPLE}.preproc.bam"
+    S3_PERM_OUT="${S3_PERMANENT}/${SAMPLE}.preproc.bam"
+    S3_RUN_OUT="${S3_RUN_PREPROC}/${SAMPLE}.preproc.bam"
     LOCAL_BAM="${OUTDIR}/${SAMPLE}.preproc.bam"
-    S3_DATE=""
-    if S3_META=$(aws s3 ls "${S3_OUT}" 2>/dev/null); then
+
+    if S3_META=$(aws s3 ls "${S3_PERM_OUT}" 2>/dev/null); then
         S3_DATE=$(echo "${S3_META}" | awk '{print $1, $2}')
-        SAMPLE_STATUS["${SAMPLE}"]="done_s3"
-        SAMPLE_INFO["${SAMPLE}"]="preprocessed on S3 (${S3_DATE})"
+        SAMPLE_STATUS["${SAMPLE}"]="done_permanent"
+        SAMPLE_INFO["${SAMPLE}"]="preprocessed/indexed in permanent S3 store (${S3_DATE})"
+    elif S3_META=$(aws s3 ls "${S3_RUN_OUT}" 2>/dev/null); then
+        S3_DATE=$(echo "${S3_META}" | awk '{print $1, $2}')
+        SAMPLE_STATUS["${SAMPLE}"]="done_run"
+        SAMPLE_INFO["${SAMPLE}"]="preprocessed in run results (${S3_DATE})"
     elif [[ -f "${LOCAL_BAM}" ]]; then
         LOCAL_DATE=$(date -r "${LOCAL_BAM}" '+%Y-%m-%d %H:%M')
         SAMPLE_STATUS["${SAMPLE}"]="done_local"
@@ -43,29 +55,53 @@ done
 log "========================================"
 
 # --- Per-sample interactive confirmation -------------------------------------
-declare -A RUN_SAMPLE   # "yes" | "no"
+declare -A RUN_SAMPLE   # "yes" | "no" | "copy_only"
 
 for SAMPLE in "${ALL_SAMPLES[@]}"; do
     if [[ "${SAMPLE_STATUS[${SAMPLE}]}" == "new" ]]; then
         RUN_SAMPLE["${SAMPLE}"]="yes"
+    elif [[ "${SAMPLE_STATUS[${SAMPLE}]}" == "done_permanent" ]]; then
+        echo ""
+        echo "  Sample '${SAMPLE}' was previously ${SAMPLE_INFO[${SAMPLE}]}."
+        while true; do
+            read -r -p "  Skip / copy to run results / reprocess? [s=skip / c=copy / r=reprocess]: " CHOICE
+            case "${CHOICE}" in
+                s|S) RUN_SAMPLE["${SAMPLE}"]="no";        log "  -> Skipping ${SAMPLE}";              break ;;
+                c|C) RUN_SAMPLE["${SAMPLE}"]="copy_only"; log "  -> Will copy ${SAMPLE} to run results"; break ;;
+                r|R) RUN_SAMPLE["${SAMPLE}"]="yes";       log "  -> Will reprocess ${SAMPLE}";         break ;;
+                *) echo "  Please enter 's', 'c', or 'r'." ;;
+            esac
+        done
     else
         echo ""
         echo "  Sample '${SAMPLE}' was previously ${SAMPLE_INFO[${SAMPLE}]}."
         while true; do
             read -r -p "  Skip or reprocess? [s=skip / r=reprocess]: " CHOICE
             case "${CHOICE}" in
-                s|S|skip)   RUN_SAMPLE["${SAMPLE}"]="no";  log "  -> Skipping ${SAMPLE}";    break ;;
-                r|R|reprocess) RUN_SAMPLE["${SAMPLE}"]="yes"; log "  -> Will reprocess ${SAMPLE}"; break ;;
-                *) echo "  Please enter 's' to skip or 'r' to reprocess." ;;
+                s|S) RUN_SAMPLE["${SAMPLE}"]="no";  log "  -> Skipping ${SAMPLE}";    break ;;
+                r|R) RUN_SAMPLE["${SAMPLE}"]="yes"; log "  -> Will reprocess ${SAMPLE}"; break ;;
+                *) echo "  Please enter 's' or 'r'." ;;
             esac
         done
     fi
 done
 echo ""
 
+# =============================================================================
 for SAMPLE in "${ALL_SAMPLES[@]}"; do
     FINAL_BAM="${OUTDIR}/${SAMPLE}.preproc.bam"
-    S3_OUT="${S3_PREPROC}/${SAMPLE}.preproc.bam"
+    S3_PERM_OUT="${S3_PERMANENT}/${SAMPLE}.preproc.bam"
+    S3_RUN_OUT="${S3_RUN_PREPROC}/${SAMPLE}.preproc.bam"
+
+    # --- Copy from permanent store to run results (no reprocessing) ----------
+    if [[ "${RUN_SAMPLE[${SAMPLE}]}" == "copy_only" ]]; then
+        log "Copying ${SAMPLE} from permanent store to run results..."
+        aws s3 cp "${S3_PERM_OUT}"              "${S3_RUN_OUT}"
+        aws s3 cp "${S3_PERM_OUT%.bam}.bai"     "${S3_RUN_OUT%.bam}.bai" 2>/dev/null || true
+        aws s3 cp "${S3_PERM_OUT%.bam}.bam.bai" "${S3_RUN_OUT%.bam}.bam.bai" 2>/dev/null || true
+        log "  Done: ${SAMPLE} (copied)"
+        continue
+    fi
 
     if [[ "${RUN_SAMPLE[${SAMPLE}]}" == "no" ]]; then
         skip "${SAMPLE} (user chose to skip)"
@@ -87,8 +123,9 @@ for SAMPLE in "${ALL_SAMPLES[@]}"; do
     aws s3 cp "${S3_BAM}/${SAMPLE}.bam"     "${LOCAL_RAW}"
     aws s3 cp "${S3_BAM}/${SAMPLE}.bam.bai" "${LOCAL_RAW}.bai"
 
-    # --- 1b. Sort (coordinate) — skip if already sorted ---------------------
-    SORT_ORDER=$(${SAMTOOLS} view -H "${LOCAL_RAW}" | awk '/^@HD/{for(i=1;i<=NF;i++) if($i~/^SO:/) {sub("SO:","",$i); print $i}}')
+    # --- 1b. Sort (coordinate) -----------------------------------------------
+    SORT_ORDER=$(${SAMTOOLS} view -H "${LOCAL_RAW}" | awk '/^@HD/{
+        for(i=1;i<=NF;i++) if($i~/^SO:/) {sub("SO:","",$i); print $i}}')
     if [[ "${SORT_ORDER}" == "coordinate" ]]; then
         log "  Already coordinate-sorted — skipping sort"
         cp "${LOCAL_RAW}" "${LOCAL_SORTED}"
@@ -100,8 +137,7 @@ for SAMPLE in "${ALL_SAMPLES[@]}"; do
     fi
     rm -f "${LOCAL_RAW}" "${LOCAL_RAW}.bai"
 
-    # --- 1c. MarkDuplicates (Picard) ----------------------------------------
-    # Check if already marked (look for PG ID:MarkDuplicates in header)
+    # --- 1c. MarkDuplicates --------------------------------------------------
     if ${SAMTOOLS} view -H "${LOCAL_SORTED}" | grep -q "ID:MarkDuplicates"; then
         log "  Duplicates already marked — skipping MarkDuplicates"
         cp "${LOCAL_SORTED}" "${LOCAL_DEDUP}"
@@ -121,7 +157,7 @@ for SAMPLE in "${ALL_SAMPLES[@]}"; do
     fi
     rm -f "${LOCAL_SORTED}" "${LOCAL_SORTED}.bai"
 
-    # --- 1d. BQSR — BaseRecalibrator + ApplyBQSR ----------------------------
+    # --- 1d. BQSR ------------------------------------------------------------
     log "  Running BaseRecalibrator..."
     BQSR_ARGS="-R ${REF} -I ${LOCAL_DEDUP} -O ${RECAL_TABLE}"
     if [[ -f "${KNOWN_SNPS}" && ! -f "${KNOWN_SNPS}.missing" ]]; then
@@ -141,7 +177,7 @@ for SAMPLE in "${ALL_SAMPLES[@]}"; do
         -O "${FINAL_BAM}" 2>&1 | grep -E "INFO  Prog" | tail -3 || true
     rm -f "${LOCAL_DEDUP}" "${LOCAL_DEDUP}.bai" "${LOCAL_DEDUP%.bam}.bai"
 
-    # --- 1e. ValidateSamFile ------------------------------------------------
+    # --- 1e. ValidateSamFile -------------------------------------------------
     log "  Validating BAM..."
     VALIDATE_OUT="${OUTDIR}/${SAMPLE}.validate.txt"
     ${GATK} ${JAVA_OPTS:+--java-options "${JAVA_OPTS}"} ValidateSamFile \
@@ -154,15 +190,21 @@ for SAMPLE in "${ALL_SAMPLES[@]}"; do
         log "  [WARN] Validation issues — see ${VALIDATE_OUT}"
     fi
 
-    # --- 1f. Upload to S3, clean local --------------------------------------
-    log "  Uploading preprocessed BAM to S3..."
-    aws s3 cp "${FINAL_BAM}"       "${S3_OUT}"
-    aws s3 cp "${FINAL_BAM%.bam}.bai" "${S3_OUT%.bam}.bai" 2>/dev/null || \
-    aws s3 cp "${FINAL_BAM}.bai"   "${S3_OUT}.bai" 2>/dev/null || true
-    aws s3 cp "${METRICS}"         "${S3_PREPROC}/$(basename ${METRICS})" 2>/dev/null || true
+    # --- 1f. Upload to permanent S3 store + run results ----------------------
+    log "  Uploading to permanent S3 store (${S3_PERMANENT})..."
+    aws s3 cp "${FINAL_BAM}"          "${S3_PERM_OUT}"
+    aws s3 cp "${FINAL_BAM%.bam}.bai" "${S3_PERM_OUT%.bam}.bai" 2>/dev/null || \
+    aws s3 cp "${FINAL_BAM}.bai"      "${S3_PERM_OUT}.bai"      2>/dev/null || true
+    aws s3 cp "${METRICS}"            "${S3_PERMANENT}/$(basename ${METRICS})" 2>/dev/null || true
+    log "  Copying to run results (${S3_RUN_PREPROC})..."
+    aws s3 cp "${S3_PERM_OUT}"              "${S3_RUN_OUT}"
+    aws s3 cp "${S3_PERM_OUT%.bam}.bai"     "${S3_RUN_OUT%.bam}.bai" 2>/dev/null || \
+    aws s3 cp "${S3_PERM_OUT}.bai"          "${S3_RUN_OUT}.bai"      2>/dev/null || true
 
     rm -f "${FINAL_BAM}" "${FINAL_BAM%.bam}.bai" "${FINAL_BAM}.bai"
     log "  Done: ${SAMPLE}"
 done
 
-log "Step 1 complete — all preprocessed BAMs on S3: ${S3_PREPROC}/"
+log "Step 1 complete."
+log "  Permanent store : ${S3_PERMANENT}/"
+log "  Run results     : ${S3_RUN_PREPROC}/"

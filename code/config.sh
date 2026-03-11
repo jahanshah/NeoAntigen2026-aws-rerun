@@ -28,6 +28,7 @@ export RESULTS_DIR="${BASE_DIR}/results/${RUN_ID}"
 # --- S3 ----------------------------------------------------------------------
 export S3_ROOT="s3://neoantigen2026-rerun"
 export S3_BAM="${S3_ROOT}/data/bam/wes"
+export S3_BAM_PREPROC="${S3_ROOT}/data/bam/wes/preprocessed"   # permanent preprocessed BAMs (reused across runs)
 export S3_REF="${S3_ROOT}/data/reference/wes"
 export S3_RESULTS="${S3_ROOT}/results/${RUN_ID}"
 

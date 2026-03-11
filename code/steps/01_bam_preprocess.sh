@@ -34,7 +34,21 @@ if [[ "${PARALLEL_JOBS}" -gt 1 ]] && [[ "${TMP_DIR}" == /tmp/* ]]; then
     PARALLEL_JOBS=1
 fi
 
-ALL_SAMPLES=("${NORMAL_SAMPLE}" "${PON_NORMALS[1]}" "${TUMOR_SAMPLES[@]}")
+# SAMPLE_FILTER: space-separated list to restrict which samples to process.
+# Set by run_pipeline.sh for phased execution (normals first, then tumors).
+# Unset or empty = process all samples (default interactive behaviour).
+if [[ -n "${SAMPLE_FILTER:-}" ]]; then
+    read -ra ALL_SAMPLES <<< "${SAMPLE_FILTER}"
+    log "Sample filter active: ${ALL_SAMPLES[*]}"
+else
+    ALL_SAMPLES=("${NORMAL_SAMPLE}" "${PON_NORMALS[1]}" "${TUMOR_SAMPLES[@]}")
+fi
+
+# NON_INTERACTIVE: when set, auto-answer prompts without user input.
+#   done_permanent → copy_only   (fast S3-side copy to run results)
+#   done_run / done_local → no   (already accessible, skip)
+#   new → yes                    (always process)
+NON_INTERACTIVE="${NON_INTERACTIVE:-}"
 
 # --- Pre-run status check ----------------------------------------------------
 log "========================================"
@@ -75,28 +89,38 @@ for SAMPLE in "${ALL_SAMPLES[@]}"; do
     if [[ "${SAMPLE_STATUS[${SAMPLE}]}" == "new" ]]; then
         RUN_SAMPLE["${SAMPLE}"]="yes"
     elif [[ "${SAMPLE_STATUS[${SAMPLE}]}" == "done_permanent" ]]; then
-        echo ""
-        echo "  Sample '${SAMPLE}' was previously ${SAMPLE_INFO[${SAMPLE}]}."
-        while true; do
-            read -r -p "  Skip / copy to run results / reprocess? [s=skip / c=copy / r=reprocess]: " CHOICE
-            case "${CHOICE}" in
-                s|S) RUN_SAMPLE["${SAMPLE}"]="no";        log "  -> Skipping ${SAMPLE}";              break ;;
-                c|C) RUN_SAMPLE["${SAMPLE}"]="copy_only"; log "  -> Will copy ${SAMPLE} to run results"; break ;;
-                r|R) RUN_SAMPLE["${SAMPLE}"]="yes";       log "  -> Will reprocess ${SAMPLE}";         break ;;
-                *) echo "  Please enter 's', 'c', or 'r'." ;;
-            esac
-        done
+        if [[ -n "${NON_INTERACTIVE}" ]]; then
+            RUN_SAMPLE["${SAMPLE}"]="copy_only"
+            log "  [auto] ${SAMPLE} → copy to run results"
+        else
+            echo ""
+            echo "  Sample '${SAMPLE}' was previously ${SAMPLE_INFO[${SAMPLE}]}."
+            while true; do
+                read -r -p "  Skip / copy to run results / reprocess? [s=skip / c=copy / r=reprocess]: " CHOICE
+                case "${CHOICE}" in
+                    s|S) RUN_SAMPLE["${SAMPLE}"]="no";        log "  -> Skipping ${SAMPLE}";              break ;;
+                    c|C) RUN_SAMPLE["${SAMPLE}"]="copy_only"; log "  -> Will copy ${SAMPLE} to run results"; break ;;
+                    r|R) RUN_SAMPLE["${SAMPLE}"]="yes";       log "  -> Will reprocess ${SAMPLE}";         break ;;
+                    *) echo "  Please enter 's', 'c', or 'r'." ;;
+                esac
+            done
+        fi
     else
-        echo ""
-        echo "  Sample '${SAMPLE}' was previously ${SAMPLE_INFO[${SAMPLE}]}."
-        while true; do
-            read -r -p "  Skip or reprocess? [s=skip / r=reprocess]: " CHOICE
-            case "${CHOICE}" in
-                s|S) RUN_SAMPLE["${SAMPLE}"]="no";  log "  -> Skipping ${SAMPLE}";    break ;;
-                r|R) RUN_SAMPLE["${SAMPLE}"]="yes"; log "  -> Will reprocess ${SAMPLE}"; break ;;
-                *) echo "  Please enter 's' or 'r'." ;;
-            esac
-        done
+        if [[ -n "${NON_INTERACTIVE}" ]]; then
+            RUN_SAMPLE["${SAMPLE}"]="no"
+            log "  [auto] ${SAMPLE} → skip (already exists)"
+        else
+            echo ""
+            echo "  Sample '${SAMPLE}' was previously ${SAMPLE_INFO[${SAMPLE}]}."
+            while true; do
+                read -r -p "  Skip or reprocess? [s=skip / r=reprocess]: " CHOICE
+                case "${CHOICE}" in
+                    s|S) RUN_SAMPLE["${SAMPLE}"]="no";  log "  -> Skipping ${SAMPLE}";    break ;;
+                    r|R) RUN_SAMPLE["${SAMPLE}"]="yes"; log "  -> Will reprocess ${SAMPLE}"; break ;;
+                    *) echo "  Please enter 's' or 'r'." ;;
+                esac
+            done
+        fi
     fi
 done
 echo ""

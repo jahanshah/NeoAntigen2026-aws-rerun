@@ -40,6 +40,7 @@ export SAMTOOLS="${CONDA_BIN}/samtools"
 export BCFTOOLS="${CONDA_BIN}/bcftools"
 export GATK_LOCAL_JAR="${CONDA_BIN}/../share/gatk4-4.6.2.0-0/gatk-package-4.6.2.0-local.jar"
 export GATK="${CONDA_BIN}/gatk"
+export GATK_SPARK="GATK_LOCAL_JAR=${GATK_LOCAL_JAR} ${CONDA_BIN}/gatk"   # enables Spark tools
 export PYTHON="${CONDA_BIN}/python3"
 export PICARD="${CONDA_BIN}/picard"
 export SNPEFF="${CONDA_BIN}/snpEff"

@@ -150,37 +150,74 @@ preprocess_one_sample() {
     fi
     rm -f "${LOCAL_RAW}" "${LOCAL_RAW}.bai"
 
-    # --- 1c. MarkDuplicates --------------------------------------------------
+    # --- 1c. MarkDuplicatesSpark (multi-core) ----------------------------------
     if ${SAMTOOLS} view -H "${LOCAL_SORTED}" | grep -q "ID:MarkDuplicates"; then
         log "  Duplicates already marked — skipping MarkDuplicates"
         cp "${LOCAL_SORTED}" "${LOCAL_DEDUP}"
         ${SAMTOOLS} index "${LOCAL_DEDUP}"
     else
-        log "  Marking duplicates..."
-        ${GATK} ${JAVA_OPTS:+--java-options "${JAVA_OPTS}"} MarkDuplicates \
+        log "  Marking duplicates (Spark, ${THREADS} cores)..."
+        GATK_LOCAL_JAR="${GATK_LOCAL_JAR}" \
+        ${GATK} ${JAVA_OPTS:+--java-options "${JAVA_OPTS}"} MarkDuplicatesSpark \
             -I "${LOCAL_SORTED}" \
             -O "${LOCAL_DEDUP}" \
             -M "${METRICS}" \
-            --REMOVE_DUPLICATES false \
-            --OPTICAL_DUPLICATE_PIXEL_DISTANCE 2500 \
-            --CREATE_INDEX true \
-            --VALIDATION_STRINGENCY LENIENT \
-            --TMP_DIR "${TMP_DIR}/preproc" 2>&1 | grep -E "INFO|WARN|ERROR" | tail -5 || true
+            --remove-sequencing-duplicates false \
+            --optical-duplicate-pixel-distance 2500 \
+            --spark-master "local[${THREADS}]" \
+            --tmp-dir "${TMP_DIR}/preproc" 2>&1 | grep -E "INFO|WARN|ERROR" | tail -5 || true
+        ${SAMTOOLS} index "${LOCAL_DEDUP}"
         log "  Dup metrics: ${METRICS}"
     fi
     rm -f "${LOCAL_SORTED}" "${LOCAL_SORTED}.bai"
 
-    # --- 1d. BQSR ------------------------------------------------------------
-    log "  Running BaseRecalibrator..."
-    local BQSR_ARGS="-R ${REF} -I ${LOCAL_DEDUP} -O ${RECAL_TABLE}"
-    if [[ -f "${KNOWN_SNPS}" && ! -f "${KNOWN_SNPS}.missing" ]]; then
-        BQSR_ARGS="${BQSR_ARGS} --known-sites ${KNOWN_SNPS}"
+    # --- 1d. BQSR (scattered across chromosomes, then merged) ----------------
+    local KNOWN_SITES_ARG=""
+    if [[ -f "${KNOWN_SNPS}" ]]; then
+        KNOWN_SITES_ARG="--known-sites ${KNOWN_SNPS}"
     else
         log "  [WARN] No known SNPs — BQSR running without dbSNP"
-        BQSR_ARGS="${BQSR_ARGS} --run-without-dbsnp-potentially-ruining-quality"
+        KNOWN_SITES_ARG="--run-without-dbsnp-potentially-ruining-quality"
     fi
-    ${GATK} ${JAVA_OPTS:+--java-options "${JAVA_OPTS}"} BaseRecalibrator \
-        ${BQSR_ARGS} 2>&1 | grep -E "^23|INFO  Prog" | tail -3 || true
+
+    # Main chromosomes only (skips unplaced contigs for speed; captures >99% of reads)
+    local CHROMS=(chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10
+                  chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19
+                  chrX chrY chrM)
+    local SCATTER_DIR="${TMP_DIR}/preproc/${SAMPLE}_bqsr_scatter"
+    mkdir -p "${SCATTER_DIR}"
+
+    log "  Running BaseRecalibrator (scattered across ${#CHROMS[@]} chromosomes)..."
+    local SCATTER_PIDS=() SCATTER_TABLES=()
+    local BQSR_JAVA="-Xmx1500m"   # small heap per scatter job; I/O-bound not memory-bound
+
+    for CHR in "${CHROMS[@]}"; do
+        local CHR_TABLE="${SCATTER_DIR}/${SAMPLE}.${CHR}.recal.table"
+        SCATTER_TABLES+=("${CHR_TABLE}")
+        ${GATK} --java-options "${BQSR_JAVA}" BaseRecalibrator \
+            -R "${REF}" -I "${LOCAL_DEDUP}" \
+            -L "${CHR}" \
+            ${KNOWN_SITES_ARG} \
+            -O "${CHR_TABLE}" > "${SCATTER_DIR}/${CHR}.log" 2>&1 &
+        SCATTER_PIDS+=($!)
+    done
+
+    # Wait for all scatter jobs; fail fast on any error
+    local SCATTER_FAILED=0
+    for i in "${!SCATTER_PIDS[@]}"; do
+        if ! wait "${SCATTER_PIDS[$i]}"; then
+            log "  [ERROR] BaseRecalibrator failed for ${CHROMS[$i]} — see ${SCATTER_DIR}/${CHROMS[$i]}.log"
+            SCATTER_FAILED=1
+        fi
+    done
+    [[ "${SCATTER_FAILED}" -eq 1 ]] && return 1
+
+    log "  Merging BQSR scatter tables..."
+    local INPUT_ARGS=""
+    for T in "${SCATTER_TABLES[@]}"; do INPUT_ARGS="${INPUT_ARGS} -I ${T}"; done
+    ${GATK} --java-options "${JAVA_OPTS}" GatherBQSRReports \
+        ${INPUT_ARGS} -O "${RECAL_TABLE}" 2>&1 | tail -2 || true
+    rm -rf "${SCATTER_DIR}"
 
     log "  Applying BQSR..."
     ${GATK} ${JAVA_OPTS:+--java-options "${JAVA_OPTS}"} ApplyBQSR \

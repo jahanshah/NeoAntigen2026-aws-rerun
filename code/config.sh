@@ -50,6 +50,10 @@ export NETMHCPAN="${CONDA_BIN}/netMHCpan"
 export NORMAL_SAMPLE="423_D0_old"
 export NORMAL_SM="D0_old"
 export PON_NORMALS=("423_D0_old" "424_D0__old")
+declare -A PON_SM_TAGS
+PON_SM_TAGS["423_D0_old"]="D0_old"
+PON_SM_TAGS["424_D0__old"]="D0+_old"
+export PON_SM_TAGS
 
 # Tumour samples — ordered by timepoint
 export TUMOR_SAMPLES=("443_D21_new" "428_D20_new" "34_D52_old" "36_D99_new" "38_D99_new" "42_D122_old")
@@ -57,7 +61,7 @@ declare -A TUMOR_SM_TAGS
 TUMOR_SM_TAGS["443_D21_new"]="D21_new"
 TUMOR_SM_TAGS["428_D20_new"]="D20_new"
 TUMOR_SM_TAGS["34_D52_old"]="D52_old"
-TUMOR_SM_TAGS["36_D99_new"]="D99_new"
+TUMOR_SM_TAGS["36_D99_new"]="D99_new_36"
 TUMOR_SM_TAGS["38_D99_new"]="D99_new"
 TUMOR_SM_TAGS["42_D122_old"]="D122_old"
 export TUMOR_SM_TAGS

@@ -11,7 +11,7 @@ export CODE_DIR="${BASE_DIR}/code"
 export REF_DIR="${BASE_DIR}/ref/mm10"
 # Use /scratch if available (500GB EBS scratch volume — see setup_scratch_volume.sh)
 # Fall back to /tmp (15GB tmpfs) — safe for sequential runs, too small for parallel
-export TMP_DIR="${TMP_DIR:-$( [[ -d /scratch ]] && echo /scratch/neoantig_pipeline || echo /tmp/neoantig_pipeline )}"
+export TMP_DIR="${TMP_DIR:-$( [[ -d /scratch ]] && echo /scratch/neoantig_pipeline || echo /home/ec2-user/tmp/neoantig_pipeline )}"
 
 # --- Reference ---------------------------------------------------------------
 export REF="${REF_DIR}/mm10.fa"

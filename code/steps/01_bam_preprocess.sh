@@ -124,8 +124,8 @@ preprocess_one_sample() {
     # --- Disk space check ----------------------------------------------------
     local AVAIL_GB
     AVAIL_GB=$(df -BG "${TMP_DIR}" | awk 'NR==2{gsub("G","",$4); print $4}')
-    if [[ "${AVAIL_GB}" -lt 12 ]]; then
-        log "[ERROR] Only ${AVAIL_GB}GB free in ${TMP_DIR} — need ≥12GB for ${SAMPLE}. Aborting."
+    if [[ "${AVAIL_GB}" -lt 18 ]]; then
+        log "[ERROR] Only ${AVAIL_GB}GB free in ${TMP_DIR} — need ≥18GB for ${SAMPLE}. Aborting."
         return 1
     fi
     log "  Disk: ${AVAIL_GB}GB free in ${TMP_DIR}"

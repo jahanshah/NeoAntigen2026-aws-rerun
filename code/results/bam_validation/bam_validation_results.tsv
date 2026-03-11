@@ -1,0 +1,8 @@
+sample	s3_path	size_gb	quickcheck	sort_order	reference_build	read_group	index_present	total_reads	mapped_reads	mapped_pct	duplication_pct	passed_qc	notes
+34_D52_old	s3://bam-wes/NeoAntigen-aws/data/bam/34_D52_old.bam	4.25	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	110332360	110332360	100.00	0.00	FAIL	bgzf_eof_missing;no_bai_index;
+36_D99_new	s3://bam-wes/NeoAntigen-aws/data/bam/36_D99_new.bam	9.88	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	255236090	255236090	100.00	0.00	FAIL	bgzf_eof_missing;no_bai_index;
+38_D99_new	s3://bam-wes/NeoAntigen-aws/data/bam/38_D99_new.bam	9.39	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	240750575	240750575	100.00	0.00	FAIL	bgzf_eof_missing;no_bai_index;
+423_D0_old	s3://bam-wes/NeoAntigen-aws/data/bam/423_D0_old.bam	4.71	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	119876834	119876834	100.00	0.00	FAIL	bgzf_eof_missing;no_bai_index;
+424_D0__old	s3://bam-wes/NeoAntigen-aws/data/bam/424_D0__old.bam	4.07	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	107141721	107141721	100.00	0.00	FAIL	bgzf_eof_missing;no_bai_index;
+428_D20_new	s3://bam-wes/NeoAntigen-aws/data/bam/428_D20_new.bam	9.49	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	236972947	236972947	100.00	0.00	FAIL	bgzf_eof_missing;no_bai_index;
+42_D122_old	s3://bam-wes/NeoAntigen-aws/data/bam/42_D122_old.bam	3.78	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	96402629	96402629	100.00	0.00	FAIL	bgzf_eof_missing;no_bai_index;

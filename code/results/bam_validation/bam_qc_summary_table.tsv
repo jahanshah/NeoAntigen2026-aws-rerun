@@ -1,0 +1,8 @@
+Sample	Size (GB)	Quickcheck	Sort Order	Reference	Read Groups	Index (.bai)	Total Reads	Mapped (%)	Dup (%)	QC	Notes
+34_D52_old	4.25	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	110,332,360	100.0%	0.0%	FAIL	bgzf_eof_missing;no_bai_index;
+36_D99_new	9.88	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	255,236,090	100.0%	0.0%	FAIL	bgzf_eof_missing;no_bai_index;
+38_D99_new	9.39	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	240,750,575	100.0%	0.0%	FAIL	bgzf_eof_missing;no_bai_index;
+423_D0_old	4.71	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	119,876,834	100.0%	0.0%	FAIL	bgzf_eof_missing;no_bai_index;
+424_D0__old	4.07	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	107,141,721	100.0%	0.0%	FAIL	bgzf_eof_missing;no_bai_index;
+428_D20_new	9.49	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	236,972,947	100.0%	0.0%	FAIL	bgzf_eof_missing;no_bai_index;
+42_D122_old	3.78	FAIL	coordinate	mm10/GRCm38	YES(1)	NO	96,402,629	100.0%	0.0%	FAIL	bgzf_eof_missing;no_bai_index;

@@ -1,0 +1,8 @@
+sample	s3_bam	s3_bai	size_gb	index_status	index_time_min	notes
+34_D52_old	s3://bam-wes/NeoAntigen-aws/data/bam/34_D52_old.bam	s3://bam-wes/NeoAntigen-aws/data/bam/34_D52_old.bam.bai	4.25	PASS	0.5	none
+36_D99_new	s3://bam-wes/NeoAntigen-aws/data/bam/36_D99_new.bam	s3://bam-wes/NeoAntigen-aws/data/bam/36_D99_new.bam.bai	9.88	PASS	1.1	none
+38_D99_new	s3://bam-wes/NeoAntigen-aws/data/bam/38_D99_new.bam	s3://bam-wes/NeoAntigen-aws/data/bam/38_D99_new.bam.bai	9.39	PASS	1.1	none
+423_D0_old	s3://bam-wes/NeoAntigen-aws/data/bam/423_D0_old.bam	s3://bam-wes/NeoAntigen-aws/data/bam/423_D0_old.bam.bai	4.71	PASS	0.6	none
+424_D0__old	s3://bam-wes/NeoAntigen-aws/data/bam/424_D0__old.bam	s3://bam-wes/NeoAntigen-aws/data/bam/424_D0__old.bam.bai	4.07	PASS	0.5	none
+428_D20_new	s3://bam-wes/NeoAntigen-aws/data/bam/428_D20_new.bam	s3://bam-wes/NeoAntigen-aws/data/bam/428_D20_new.bam.bai	9.49	PASS	1.1	none
+42_D122_old	s3://bam-wes/NeoAntigen-aws/data/bam/42_D122_old.bam	s3://bam-wes/NeoAntigen-aws/data/bam/42_D122_old.bam.bai	3.78	PASS	0.5	none

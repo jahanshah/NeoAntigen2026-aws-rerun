@@ -1,2 +1,7 @@
 aws/
 data/
+code/Miniforge3-Linux-x86_64.sh
+results/preprocessed_bams/
+**/*.bam
+**/*.bai
+**/*.recal.table

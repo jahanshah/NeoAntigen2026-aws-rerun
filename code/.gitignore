@@ -1,0 +1,16 @@
+# BAM/CRAM/intermediate alignment files
+*.bam
+*.bai
+*.cram
+*.crai
+*.sam
+
+# Conda installer
+Miniforge3-*.sh
+
+# Temporary R library build dirs
+results/bam_validation/lib*/
+
+# System/macOS
+.DS_Store
+__pycache__/

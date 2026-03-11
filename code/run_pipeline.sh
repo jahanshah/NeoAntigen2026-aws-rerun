@@ -11,6 +11,10 @@
 # =============================================================================
 
 set -euo pipefail
+
+# Generate run ID once here so all steps share the same timestamp
+export RUN_ID="res_$(date '+%Y%m%d_%H%M%S')"
+
 source /home/ec2-user/code/config.sh
 
 STEPS_DIR="/home/ec2-user/code/steps"

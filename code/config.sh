@@ -9,7 +9,6 @@
 export BASE_DIR="/home/ec2-user"
 export CODE_DIR="${BASE_DIR}/code"
 export REF_DIR="${BASE_DIR}/ref/mm10"
-export RESULTS_DIR="${BASE_DIR}/results"
 export TMP_DIR="/tmp/neoantig_pipeline"
 
 # --- Reference ---------------------------------------------------------------
@@ -20,11 +19,17 @@ export EXON_BED="${REF_DIR}/mm10_exons.bed"
 export KNOWN_SNPS="${REF_DIR}/mgp_snps.vcf.gz"
 export SNPEFF_DB="GRCm38.86"
 
+# --- Run ID (timestamped) ----------------------------------------------------
+# Set once by run_pipeline.sh and exported; individual steps inherit it.
+# If a step is run standalone, a new timestamp is generated.
+export RUN_ID="${RUN_ID:-res_$(date '+%Y%m%d_%H%M%S')}"
+export RESULTS_DIR="${BASE_DIR}/results/${RUN_ID}"
+
 # --- S3 ----------------------------------------------------------------------
 export S3_ROOT="s3://neoantigen2026-rerun"
 export S3_BAM="${S3_ROOT}/data/bam/wes"
 export S3_REF="${S3_ROOT}/data/reference/wes"
-export S3_RESULTS="${S3_ROOT}/results"
+export S3_RESULTS="${S3_ROOT}/results/${RUN_ID}"
 
 # --- Tools -------------------------------------------------------------------
 export CONDA_BIN="/home/ec2-user/miniforge3/bin"
@@ -70,3 +75,4 @@ s3up() {
 s3rm_local() { [[ -f "$1" ]] && rm -f "$1" && log "Removed local: $1"; }
 
 mkdir -p "${TMP_DIR}" "${RESULTS_DIR}"
+log "Run ID: ${RUN_ID}  →  local: ${RESULTS_DIR}  |  S3: ${S3_RESULTS}"

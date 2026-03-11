@@ -21,8 +21,9 @@ export KNOWN_SNPS="${REF_DIR}/mgp_snps.vcf.gz"
 export SNPEFF_DB="GRCm38.86"
 
 # --- S3 ----------------------------------------------------------------------
-export S3_ROOT="s3://bam-wes/NeoAntigen-aws"
-export S3_BAM="${S3_ROOT}/data/bam"
+export S3_ROOT="s3://neoantigen2026-rerun"
+export S3_BAM="${S3_ROOT}/data/bam/wes"
+export S3_REF="${S3_ROOT}/data/reference/wes"
 export S3_RESULTS="${S3_ROOT}/results"
 
 # --- Tools -------------------------------------------------------------------

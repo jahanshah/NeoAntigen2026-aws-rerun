@@ -1,7 +1,69 @@
+# =============================================================================
+# Large binary / intermediate files — never commit
+# =============================================================================
+
+# AWS credentials and keys
 aws/
+git_key.txt
+git_key.txt.pub
+
+# Input data (raw)
 data/
+
+# Large installers
 code/Miniforge3-Linux-x86_64.sh
-results/preprocessed_bams/
+
+# BAM / alignment intermediates
 **/*.bam
 **/*.bai
 **/*.recal.table
+**/*.dup_metrics.txt
+results/preprocessed_bams/
+
+# Compressed large files
+**/*.gz
+**/*.tgz
+**/*.tar.gz
+**/*.zip
+**/*.bgz
+
+# Large VCF intermediates (unfiltered/raw)
+results/**/raw_*.vcf
+results/**/unfiltered_*.vcf
+
+# Temporary files
+**/*.tmp
+**/*.temp
+tmp/
+/tmp/
+
+# =============================================================================
+# Force-include result file types we always want in the repo
+# =============================================================================
+
+# Reports and documentation
+!**/*.md
+!**/*.html
+!**/*.pdf
+
+# Figures
+!**/*.png
+!**/*.svg
+!**/*.jpg
+!**/*.jpeg
+
+# Tables and data outputs
+!**/*.tsv
+!**/*.csv
+!**/*.txt
+!**/*.xlsx
+!**/*.xls
+
+# Annotated / filtered VCFs (small enough)
+!results/**/*.vcf
+!results/**/*.annotated.vcf
+
+# Scripts and code
+!**/*.sh
+!**/*.py
+!**/*.R

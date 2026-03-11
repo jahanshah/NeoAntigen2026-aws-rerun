@@ -199,6 +199,32 @@ bash code/evaluate_bams_for_variant_calling.sh
 
 ---
 
+## 11. Push Results to GitHub
+
+After a run completes, push reports, tables, figures, and HTML outputs to the repo:
+
+```bash
+# Auto-detect latest local run
+bash push_results.sh
+
+# Push a specific run
+bash push_results.sh res_20260311_184352
+
+# Pull from S3 first, then push (useful on a fresh instance)
+bash push_results.sh res_20260311_184352 --from-s3
+```
+
+**What gets committed:**
+
+| Included | Excluded |
+|---|---|
+| `.html`, `.pdf`, `.png`, `.svg` | `.bam`, `.bai`, `.vcf.gz` |
+| `.tsv`, `.csv`, `.txt`, `.xlsx` | `.gz`, `.zip`, `.tar.gz` |
+| `.vcf` (filtered/annotated) | `preprocessed_bams/` |
+| `.md`, `.R`, `.py`, `.sh` | `*.recal.table`, `*.tmp` |
+
+---
+
 ## Troubleshooting
 
 | Problem | Fix |

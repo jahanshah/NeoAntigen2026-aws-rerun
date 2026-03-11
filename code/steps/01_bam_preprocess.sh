@@ -15,13 +15,60 @@ mkdir -p "${OUTDIR}" "${TMP_DIR}/preproc"
 
 ALL_SAMPLES=("${NORMAL_SAMPLE}" "${PON_NORMALS[1]}" "${TUMOR_SAMPLES[@]}")
 
+# --- Pre-run status check ----------------------------------------------------
+log "========================================"
+log "Checking preprocessing status for all samples..."
+log "========================================"
+declare -A SAMPLE_STATUS   # "done_s3" | "done_local" | "new"
+declare -A SAMPLE_INFO
+
+for SAMPLE in "${ALL_SAMPLES[@]}"; do
+    S3_OUT="${S3_PREPROC}/${SAMPLE}.preproc.bam"
+    LOCAL_BAM="${OUTDIR}/${SAMPLE}.preproc.bam"
+    S3_DATE=""
+    if S3_META=$(aws s3 ls "${S3_OUT}" 2>/dev/null); then
+        S3_DATE=$(echo "${S3_META}" | awk '{print $1, $2}')
+        SAMPLE_STATUS["${SAMPLE}"]="done_s3"
+        SAMPLE_INFO["${SAMPLE}"]="preprocessed on S3 (${S3_DATE})"
+    elif [[ -f "${LOCAL_BAM}" ]]; then
+        LOCAL_DATE=$(date -r "${LOCAL_BAM}" '+%Y-%m-%d %H:%M')
+        SAMPLE_STATUS["${SAMPLE}"]="done_local"
+        SAMPLE_INFO["${SAMPLE}"]="preprocessed locally (${LOCAL_DATE}), not yet on S3"
+    else
+        SAMPLE_STATUS["${SAMPLE}"]="new"
+        SAMPLE_INFO["${SAMPLE}"]="not yet processed"
+    fi
+    log "  ${SAMPLE}: ${SAMPLE_INFO[${SAMPLE}]}"
+done
+log "========================================"
+
+# --- Per-sample interactive confirmation -------------------------------------
+declare -A RUN_SAMPLE   # "yes" | "no"
+
+for SAMPLE in "${ALL_SAMPLES[@]}"; do
+    if [[ "${SAMPLE_STATUS[${SAMPLE}]}" == "new" ]]; then
+        RUN_SAMPLE["${SAMPLE}"]="yes"
+    else
+        echo ""
+        echo "  Sample '${SAMPLE}' was previously ${SAMPLE_INFO[${SAMPLE}]}."
+        while true; do
+            read -r -p "  Skip or reprocess? [s=skip / r=reprocess]: " CHOICE
+            case "${CHOICE}" in
+                s|S|skip)   RUN_SAMPLE["${SAMPLE}"]="no";  log "  -> Skipping ${SAMPLE}";    break ;;
+                r|R|reprocess) RUN_SAMPLE["${SAMPLE}"]="yes"; log "  -> Will reprocess ${SAMPLE}"; break ;;
+                *) echo "  Please enter 's' to skip or 'r' to reprocess." ;;
+            esac
+        done
+    fi
+done
+echo ""
+
 for SAMPLE in "${ALL_SAMPLES[@]}"; do
     FINAL_BAM="${OUTDIR}/${SAMPLE}.preproc.bam"
     S3_OUT="${S3_PREPROC}/${SAMPLE}.preproc.bam"
 
-    # Skip if already uploaded to S3
-    if aws s3 ls "${S3_OUT}" &>/dev/null; then
-        skip "${SAMPLE}.preproc.bam (S3)"
+    if [[ "${RUN_SAMPLE[${SAMPLE}]}" == "no" ]]; then
+        skip "${SAMPLE} (user chose to skip)"
         continue
     fi
 

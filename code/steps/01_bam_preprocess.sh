@@ -174,23 +174,23 @@ preprocess_one_sample() {
     fi
     rm -f "${LOCAL_RAW}" "${LOCAL_RAW}.bai"
 
-    # --- 1c. MarkDuplicatesSpark (multi-core) ----------------------------------
+    # --- 1c. MarkDuplicates --------------------------------------------------
     if ${SAMTOOLS} view -H "${LOCAL_SORTED}" | grep -q "ID:MarkDuplicates"; then
         log "  Duplicates already marked — skipping MarkDuplicates"
         cp "${LOCAL_SORTED}" "${LOCAL_DEDUP}"
         ${SAMTOOLS} index "${LOCAL_DEDUP}"
     else
-        log "  Marking duplicates (Spark, ${THREADS} cores)..."
-        GATK_LOCAL_JAR="${GATK_LOCAL_JAR}" \
-        ${GATK} ${JAVA_OPTS:+--java-options "${JAVA_OPTS}"} MarkDuplicatesSpark \
+        log "  Marking duplicates..."
+        ${GATK} ${JAVA_OPTS:+--java-options "${JAVA_OPTS}"} MarkDuplicates \
             -I "${LOCAL_SORTED}" \
             -O "${LOCAL_DEDUP}" \
             -M "${METRICS}" \
-            --remove-sequencing-duplicates false \
-            --optical-duplicate-pixel-distance 2500 \
-            --spark-master "local[${THREADS}]" \
-            --tmp-dir "${TMP_DIR}/preproc" 2>&1 | grep -E "INFO|WARN|ERROR" | tail -5 || true
-        ${SAMTOOLS} index "${LOCAL_DEDUP}"
+            --REMOVE_DUPLICATES false \
+            --OPTICAL_DUPLICATE_PIXEL_DISTANCE 2500 \
+            --CREATE_INDEX true \
+            --VALIDATION_STRINGENCY LENIENT \
+            --TMP_DIR "${TMP_DIR}/preproc"
+        [[ ! -s "${LOCAL_DEDUP}" ]] && { log "[ERROR] MarkDuplicates produced no output for ${SAMPLE}"; return 1; }
         log "  Dup metrics: ${METRICS}"
     fi
     rm -f "${LOCAL_SORTED}" "${LOCAL_SORTED}.bai"

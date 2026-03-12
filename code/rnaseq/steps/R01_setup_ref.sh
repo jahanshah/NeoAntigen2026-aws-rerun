@@ -114,6 +114,7 @@ else
             --sjdbGTFfile "${GTF}" \
             --sjdbOverhang 149 \
             --genomeSAindexNbases 14 \
+            --limitGenomeGenerateRAM 26000000000 \
             --runThreadN "${RNASEQ_THREADS}"
         log "STAR index built in $(( SECONDS - T0 ))s."
     fi

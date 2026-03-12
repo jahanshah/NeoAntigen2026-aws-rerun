@@ -16,7 +16,8 @@ source /home/ec2-user/NeoAntigen2026-aws-rerun/code/rnaseq/config_rnaseq.sh
 MAMBA="/home/ec2-user/miniforge3/bin/mamba"
 S3_STAR_INDEX="${S3_ROOT}/data/reference/rnaseq/star_index.tar.gz"
 GTF_URL="https://ftp.ensembl.org/pub/release-86/gtf/mus_musculus/Mus_musculus.GRCm38.86.gtf.gz"
-GTF_GZ="${GTF}.gz"
+GTF_RAW="/home/ec2-user/ref/mm10/mm10.gtf"      # Ensembl-style (1, X, MT)
+GTF_GZ="${GTF_RAW}.gz"
 
 # =============================================================================
 # 1. Install required tools via mamba
@@ -45,14 +46,33 @@ install_if_missing "fastp"         "fastp"
 log "--- Checking GTF (GRCm38.86) ---"
 mkdir -p "$(dirname "${GTF}")"
 
-if [[ -f "${GTF}" ]]; then
-    log "[SKIP] GTF already exists: ${GTF}"
+if [[ -f "${GTF_RAW}" ]]; then
+    log "[SKIP] GTF (raw) already exists: ${GTF_RAW}"
 else
     log "Downloading GTF from Ensembl release 86..."
     wget -q --show-progress -O "${GTF_GZ}" "${GTF_URL}"
     log "Decompressing GTF..."
     gunzip -f "${GTF_GZ}"
-    log "[OK] GTF ready: ${GTF}"
+    log "[OK] GTF (raw) ready: ${GTF_RAW}"
+fi
+
+# Convert Ensembl chr names (1,X,MT) → UCSC (chr1,chrX,chrM) to match mm10.fa
+if [[ -f "${GTF}" ]]; then
+    log "[SKIP] chr-prefixed GTF already exists: ${GTF}"
+else
+    log "Building chr-prefixed GTF (Ensembl→UCSC chr names)..."
+    awk '
+/^#/ { print; next }
+{
+    chr = $1
+    if (chr == "MT") chr = "chrM"
+    else if (chr ~ /^[0-9]+$/ || chr == "X" || chr == "Y") chr = "chr" chr
+    else next
+    $1 = chr; print
+}
+OFS="\t"
+' "${GTF_RAW}" > "${GTF}"
+    log "[OK] chr-prefixed GTF: ${GTF}"
 fi
 
 # =============================================================================

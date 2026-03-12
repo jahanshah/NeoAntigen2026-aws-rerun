@@ -17,7 +17,7 @@ export RNASEQ_STEPS_DIR="${RNASEQ_DIR}/steps"
 
 # --- Reference files ---------------------------------------------------------
 export STAR_INDEX="/home/ec2-user/ref/mm10/star_index"
-export GTF="/home/ec2-user/ref/mm10/mm10.gtf"
+export GTF="/home/ec2-user/ref/mm10/mm10_chr.gtf"   # chr-prefixed (matches UCSC mm10.fa)
 
 # --- S3 paths ----------------------------------------------------------------
 export S3_FASTQ="${S3_ROOT}/data/fastq/rnaseq"

@@ -8,6 +8,9 @@
 
 source /home/ec2-user/NeoAntigen2026-aws-rerun/code/config.sh
 
+# --- Ensure conda/mamba tools (STAR, featureCounts, samtools, etc.) are on PATH
+export PATH="${CONDA_BIN}:${PATH}"
+
 # --- RNASeq directories ------------------------------------------------------
 export RNASEQ_DIR="${CODE_DIR}/rnaseq"
 export RNASEQ_STEPS_DIR="${RNASEQ_DIR}/steps"

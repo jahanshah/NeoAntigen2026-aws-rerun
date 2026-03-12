@@ -164,8 +164,8 @@ preprocess_one_sample() {
     SORT_ORDER=$(${SAMTOOLS} view -H "${LOCAL_RAW}" | awk '/^@HD/{
         for(i=1;i<=NF;i++) if($i~/^SO:/) {sub("SO:","",$i); print $i}}')
     if [[ "${SORT_ORDER}" == "coordinate" ]]; then
-        log "  Already coordinate-sorted — skipping sort"
-        cp "${LOCAL_RAW}" "${LOCAL_SORTED}"
+        log "  Already coordinate-sorted — hard-linking (no extra disk)"
+        ln "${LOCAL_RAW}" "${LOCAL_SORTED}" 2>/dev/null || cp "${LOCAL_RAW}" "${LOCAL_SORTED}"
         ${SAMTOOLS} index "${LOCAL_SORTED}"
     else
         log "  Sorting..."

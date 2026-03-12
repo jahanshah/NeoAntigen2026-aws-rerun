@@ -67,3 +67,4 @@ tmp/
 !**/*.sh
 !**/*.py
 !**/*.R
+git_key.txt

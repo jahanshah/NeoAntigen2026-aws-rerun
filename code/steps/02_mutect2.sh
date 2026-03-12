@@ -145,7 +145,10 @@ elif [[ ! -f "${PON_VCF}" ]]; then
         -R "${REF}" \
         ${PON_V_ARGS} \
         --genomicsdb-workspace-path "${PON_DB}" \
-        ${L_ARGS} 2>&1 | grep -E "ProgressMeter|INFO.*Done|ERROR" | tail -5
+        -L chr1 -L chr2 -L chr3 -L chr4 -L chr5 -L chr6 -L chr7 -L chr8 -L chr9 \
+        -L chr10 -L chr11 -L chr12 -L chr13 -L chr14 -L chr15 -L chr16 -L chr17 \
+        -L chr18 -L chr19 -L chrX -L chrY \
+        2>&1 | grep -E "ProgressMeter|INFO.*Done|ERROR" | tail -5
 
     log "  CreateSomaticPanelOfNormals..."
     ${GATK} --java-options "${JAVA_OPTS}" CreateSomaticPanelOfNormals \
@@ -233,9 +236,10 @@ call_tumor() {
         --f1r2-tar-gz "${F1R2_F}" \
         --native-pair-hmm-threads "${THREADS}" \
         ${L_ARGS} \
-        -O "${RAW_VCF}" \
-        --stats "${STATS_F}" 2>&1 \
+        -O "${RAW_VCF}" 2>&1 \
         | grep -E "ProgressMeter|ERROR|Exception" | tail -5
+    # GATK 4.6 writes stats automatically to {output}.stats
+    mv "${RAW_VCF}.stats" "${STATS_F}" 2>/dev/null || true
 
     [[ ! -s "${RAW_VCF}" ]] && {
         log "[ERROR] Mutect2 produced no VCF for ${TUMOR}"
@@ -315,7 +319,6 @@ for TUMOR in "${TUMOR_SAMPLES[@]}"; do
             if ! kill -0 "${PIDS[$i]}" 2>/dev/null; then
                 wait "${PIDS[$i]}" || FAILED+=("slot_${i}")
                 unset 'PIDS[$i]'
-                PIDS=("${PIDS[@]}")
             fi
         done
         sleep 10

@@ -38,7 +38,7 @@ declare -A CFG_THREADS       CFG_JAVA_XMX       CFG_MUTECT_PAR    CFG_STAR_PAR
 CFG_THREADS[r5.2xlarge]=4;   CFG_JAVA_XMX[r5.2xlarge]=12;  CFG_MUTECT_PAR[r5.2xlarge]=3;  CFG_STAR_PAR[r5.2xlarge]=1
 CFG_THREADS[r5.4xlarge]=4;   CFG_JAVA_XMX[r5.4xlarge]=16;  CFG_MUTECT_PAR[r5.4xlarge]=6;  CFG_STAR_PAR[r5.4xlarge]=2
 CFG_THREADS[r5.8xlarge]=8;   CFG_JAVA_XMX[r5.8xlarge]=20;  CFG_MUTECT_PAR[r5.8xlarge]=6;  CFG_STAR_PAR[r5.8xlarge]=4
-CFG_THREADS[r5.16xlarge]=16; CFG_JAVA_XMX[r5.16xlarge]=28; CFG_MUTECT_PAR[r5.16xlarge]=6; CFG_STAR_PAR[r5.16xlarge]=6
+CFG_THREADS[r5.16xlarge]=10; CFG_JAVA_XMX[r5.16xlarge]=28; CFG_MUTECT_PAR[r5.16xlarge]=6; CFG_STAR_PAR[r5.16xlarge]=6
 CFG_THREADS[r4.8xlarge]=8;   CFG_JAVA_XMX[r4.8xlarge]=20;  CFG_MUTECT_PAR[r4.8xlarge]=6;  CFG_STAR_PAR[r4.8xlarge]=4
 
 if [[ -z "${CFG_THREADS[$TARGET_TYPE]+x}" ]]; then

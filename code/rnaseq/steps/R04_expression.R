@@ -1,29 +1,41 @@
 #!/usr/bin/env Rscript
 # =============================================================================
-# R04_expression.R — DESeq2 normalization + DEA + limma batch correction
+# R04_expression.R — DESeq2 normalization + stage-aware DEA + limma batch correction
+#
+# Sample stages (defined in samples_rnaseq.tsv):
+#   normal        — D0 (reference baseline)
+#   early         — D20, D21
+#   transitioning — D52
+#   mid           — D88, D99
+#   late          — D109, D122
+#
+# Statistical design:
+#   DEA: DESeq2 model ~ batch + stage
+#        Batch (old/new) is a covariate — corrects for batch in the GLM.
+#        DO NOT remove batch from counts before DEA (inflates false positives).
+#   Expression matrix: limma::removeBatchEffect applied to VST values ONLY
+#        for visualisation and step-12 ranking. Never used as DEA input.
+#
+# DEA contrasts run:
+#   early         vs normal  (D20/D21 vs D0)
+#   transitioning vs normal  (D52 vs D0)
+#   mid           vs normal  (D88/D99 vs D0)
+#   late          vs normal  (D109/D122 vs D0)
+#   late          vs early   (disease trajectory)
+#   mid           vs early   (disease trajectory)
 #
 # Inputs:
-#   - ${RNASEQ_RESULTS}/counts/raw_counts.txt  (featureCounts output or STAR merge)
-#   - ${RNASEQ_META}  (samples_rnaseq.tsv — for batch/role metadata)
+#   ${RNASEQ_RESULTS}/counts/raw_counts.txt  (featureCounts or STAR merge)
+#   ${RNASEQ_META}  (samples_rnaseq.tsv — 7 cols incl. stage)
 #
 # Outputs:
-#   - expression_matrix.tsv           — batch-corrected log2; rows=gene symbols,
-#                                        cols=WES sample IDs (tumor + normal only)
-#   - expression_matrix_full.tsv      — all RNASeq samples including extras
-#   - expression_by_sample.tsv        — long format (gene, sample, expr_log2)
-#   - dea_results.tsv                 — DEA: tumor-vs-D0 log2FC + padj per gene
-#   - dea_results_per_sample.tsv      — per-sample DEA results (each tumor vs D0)
-#   - rnaseq_qc.pdf                   — PCA, size factors, volcano plots
+#   expression_matrix.tsv          — batch-corrected VST; WES sample IDs
+#   expression_matrix_full.tsv     — all RNASeq samples
+#   expression_by_sample.tsv       — long format
+#   dea_results.tsv                — all contrasts combined (stage, gene, log2FC, padj)
+#   rnaseq_qc.pdf                  — PCA (coloured by stage), volcanos, size factors
 #
-# All outputs are uploaded to ${S3_RNASEQ_OUT}/
-#
-# Design:
-#   1. Load counts; filter low-expression genes (rowSums >= 10)
-#   2. DESeq2: full model (~ batch + condition); DEA tumors vs D0 normal
-#   3. VST transformation
-#   4. limma::removeBatchEffect (batch = old / new)
-#   5. Map Ensembl IDs to gene symbols via biomaRt (or local cache)
-#   6. Write outputs and upload to S3
+# All outputs uploaded to ${S3_RNASEQ_OUT}/
 # =============================================================================
 
 local_lib <- path.expand("~/R/library")
@@ -114,7 +126,7 @@ message(sprintf("Raw counts: %d genes × %d samples", nrow(count_mat), ncol(coun
 
 # ── Load sample metadata ──────────────────────────────────────────────────────
 meta <- read_tsv(rnaseq_meta, comment = "#", show_col_types = FALSE,
-                 col_names = c("sample_id","wes_id","timepoint","batch","role","fastq_pattern"))
+                 col_names = c("sample_id","wes_id","timepoint","batch","role","stage","fastq_pattern"))
 meta <- meta[!grepl("^\\s*#", meta$sample_id), ]  # extra safety
 
 message(sprintf("Sample manifest: %d samples", nrow(meta)))
@@ -134,99 +146,93 @@ keep <- rowSums(count_mat) >= 10
 count_mat <- count_mat[keep, , drop = FALSE]
 message(sprintf("After low-count filter (rowSums>=10): %d genes remain", nrow(count_mat)))
 
-# ── DESeq2: normalization + DEA ───────────────────────────────────────────────
-# condition = "normal" (D0) vs "tumor" (all other roles).
-# DEA is tumor-vs-normal; positive log2FC = upregulated in tumors.
-message("Running DESeq2 (normalization + DEA)...")
+# ── DESeq2: normalization + stage-aware DEA ───────────────────────────────────
+# Design: ~ batch + stage
+#   batch (old/new) is a covariate — absorbs sequencing batch variance in GLM.
+#   stage (normal/early/transitioning/mid/late) is the factor of interest.
+#
+# IMPORTANT: batch correction is done in the model here.
+#   limma::removeBatchEffect is applied LATER only to the VST matrix for
+#   visualisation and step-12 expression scoring. It is NEVER used as DEA input.
+
+STAGE_LEVELS <- c("normal", "early", "transitioning", "mid", "late")
+meta$stage <- factor(meta$stage, levels = STAGE_LEVELS)
+
+message("Running DESeq2 (design: ~ batch + stage)...")
 
 col_data <- data.frame(
     sample_id = meta$sample_id,
     batch     = factor(meta$batch),
-    condition = factor(ifelse(meta$role == "normal", "normal", "tumor"),
-                       levels = c("normal", "tumor")),
+    stage     = meta$stage,
     row.names = meta$sample_id
 )
 
 dds <- DESeqDataSetFromMatrix(
     countData = count_mat,
     colData   = col_data,
-    design    = ~ batch + condition
+    design    = ~ batch + stage
 )
 
-# Full DESeq2 (estimates size factors, dispersions, and GLM)
 dds <- DESeq(dds, parallel = FALSE, quiet = FALSE)
 norm_counts <- counts(dds, normalized = TRUE)
+message("DESeq2 complete.")
 
-# ── DEA: all tumors vs D0 normal (pooled) ─────────────────────────────────────
-message("Extracting DEA results (tumor vs normal)...")
-dea_res <- results(dds,
-    contrast       = c("condition", "tumor", "normal"),
-    alpha          = 0.05,
-    independentFiltering = TRUE
+# ── DEA contrasts ─────────────────────────────────────────────────────────────
+# All contrasts vs baseline (normal) plus trajectory comparisons.
+dea_contrasts <- list(
+    early_vs_normal         = c("stage", "early",         "normal"),
+    transitioning_vs_normal = c("stage", "transitioning", "normal"),
+    mid_vs_normal           = c("stage", "mid",           "normal"),
+    late_vs_normal          = c("stage", "late",          "normal"),
+    mid_vs_early            = c("stage", "mid",           "early"),
+    late_vs_early           = c("stage", "late",          "early")
 )
-dea_df <- as.data.frame(dea_res) %>%
-    tibble::rownames_to_column("gene_id") %>%
-    arrange(padj, desc(abs(log2FoldChange))) %>%
-    mutate(
-        sig       = !is.na(padj) & padj < 0.05,
-        direction = case_when(
-            sig & log2FoldChange >  1  ~ "UP",
-            sig & log2FoldChange < -1  ~ "DOWN",
-            TRUE                       ~ "NS"
-        )
-    )
 
-message(sprintf("DEA (tumor vs normal): %d UP, %d DOWN (padj<0.05, |log2FC|>1)",
-                sum(dea_df$direction == "UP"),
-                sum(dea_df$direction == "DOWN")))
-
-# ── Per-timepoint DEA: each tumor sample group vs normal ─────────────────────
-# Uses Wald test on the full DESeq object via LRT or individual contrasts.
-# For longitudinal data we run each timepoint separately.
-tumor_sids <- meta$sample_id[meta$role == "tumor"]
-normal_sids_meta <- meta$sample_id[meta$role == "normal"]
-message(sprintf("Per-sample DEA: %d tumor samples vs %d normal",
-                length(tumor_sids), length(normal_sids_meta)))
-
-per_sample_dea <- list()
-for (sid in tumor_sids) {
+dea_all <- lapply(names(dea_contrasts), function(cname) {
+    contrast <- dea_contrasts[[cname]]
+    # Check both levels are present in the data
+    if (!all(contrast[2:3] %in% levels(dds$stage))) {
+        message(sprintf("  [SKIP] %s — stage level not in data", cname))
+        return(NULL)
+    }
     tryCatch({
-        sel <- c(normal_sids_meta, sid)
-        sel <- sel[sel %in% colnames(count_mat)]
-        sub_counts <- count_mat[, sel, drop = FALSE]
-        sub_meta   <- meta[meta$sample_id %in% sel, ]
-        sub_col    <- data.frame(
-            batch     = factor(sub_meta$batch),
-            condition = factor(ifelse(sub_meta$role == "normal", "normal", "tumor"),
-                               levels = c("normal", "tumor")),
-            row.names = sub_meta$sample_id
+        res <- results(dds,
+            contrast             = contrast,
+            alpha                = 0.05,
+            independentFiltering = TRUE
         )
-        # If only one batch level, drop it from design
-        des <- if (length(unique(sub_meta$batch)) > 1) ~ batch + condition else ~ condition
-        dds_s <- DESeqDataSetFromMatrix(sub_counts, sub_col, design = des)
-        dds_s <- DESeq(dds_s, quiet = TRUE)
-        res_s <- results(dds_s, contrast = c("condition","tumor","normal"), alpha = 0.05)
-        df_s  <- as.data.frame(res_s) %>%
+        df <- as.data.frame(res) %>%
             tibble::rownames_to_column("gene_id") %>%
-            mutate(sample_id = sid,
-                   sig = !is.na(padj) & padj < 0.05,
-                   direction = case_when(
-                       sig & log2FoldChange >  1 ~ "UP",
-                       sig & log2FoldChange < -1 ~ "DOWN",
-                       TRUE ~ "NS"))
-        per_sample_dea[[sid]] <- df_s
-        message(sprintf("  %s: UP=%d  DOWN=%d", sid,
-                        sum(df_s$direction == "UP"),
-                        sum(df_s$direction == "DOWN")))
+            mutate(
+                contrast  = cname,
+                numerator = contrast[2],
+                ref_stage = contrast[3],
+                sig       = !is.na(padj) & padj < 0.05,
+                direction = case_when(
+                    sig & log2FoldChange >  1 ~ "UP",
+                    sig & log2FoldChange < -1 ~ "DOWN",
+                    TRUE                      ~ "NS"
+                )
+            )
+        message(sprintf("  DEA %-30s  UP=%d  DOWN=%d",
+                        cname,
+                        sum(df$direction == "UP"),
+                        sum(df$direction == "DOWN")))
+        df
     }, error = function(e) {
-        message(sprintf("  [WARN] DEA failed for %s: %s", sid, conditionMessage(e)))
+        message(sprintf("  [WARN] DEA failed for %s: %s", cname, conditionMessage(e)))
+        NULL
     })
-}
-dea_per_sample_df <- bind_rows(per_sample_dea)
+})
 
-# VST transformation (variance stabilizing — better for PCA/batch correction)
-# blind=FALSE: use the fitted model (more accurate when design is known)
-message("Running VST transformation...")
+dea_df <- bind_rows(Filter(Negate(is.null), dea_all)) %>%
+    arrange(contrast, padj, desc(abs(log2FoldChange)))
+message(sprintf("DEA complete: %d rows across %d contrasts",
+                nrow(dea_df), n_distinct(dea_df$contrast)))
+
+# ── VST transformation for visualisation (NOT for DEA input) ──────────────────
+# blind=FALSE: use fitted model dispersions (recommended when design is known).
+message("Running VST transformation (for visualisation only)...")
 vst_mat <- assay(vst(dds, blind = FALSE))
 
 message(sprintf("VST matrix: %d genes × %d samples", nrow(vst_mat), ncol(vst_mat)))
@@ -238,10 +244,15 @@ pca_before_df$sample_id <- rownames(pca_before_df)
 pca_before_df <- left_join(pca_before_df, meta, by = "sample_id")
 var_before <- round(100 * summary(pca_before)$importance[2, 1:2], 1)
 
+stage_colours <- c("normal" = "#4DAF4A", "early" = "#FF7F00",
+                   "transitioning" = "#984EA3", "mid" = "#E41A1C",
+                   "late" = "#377EB8")
+
 fig_pca_before <- ggplot(pca_before_df,
-       aes(x = PC1, y = PC2, colour = batch, shape = role, label = sample_id)) +
+       aes(x = PC1, y = PC2, colour = stage, shape = batch, label = sample_id)) +
     geom_point(size = 3) +
     ggrepel::geom_text_repel(size = 2.8, max.overlaps = 20) +
+    scale_colour_manual(values = stage_colours) +
     labs(title = "PCA before batch correction (VST)",
          x = sprintf("PC1 (%.1f%%)", var_before[1]),
          y = sprintf("PC2 (%.1f%%)", var_before[2])) +
@@ -264,9 +275,10 @@ pca_after_df <- left_join(pca_after_df, meta, by = "sample_id")
 var_after <- round(100 * summary(pca_after)$importance[2, 1:2], 1)
 
 fig_pca_after <- ggplot(pca_after_df,
-       aes(x = PC1, y = PC2, colour = batch, shape = role, label = sample_id)) +
+       aes(x = PC1, y = PC2, colour = stage, shape = batch, label = sample_id)) +
     geom_point(size = 3) +
     ggrepel::geom_text_repel(size = 2.8, max.overlaps = 20) +
+    scale_colour_manual(values = stage_colours) +
     labs(title = "PCA after batch correction (VST + limma)",
          x = sprintf("PC1 (%.1f%%)", var_after[1]),
          y = sprintf("PC2 (%.1f%%)", var_after[2])) +
@@ -379,19 +391,11 @@ if (exists("gene_symbols") && length(gene_symbols) == nrow(corrected_mat)) {
     dea_df <- dea_df %>%
         mutate(gene_symbol = ifelse(gene_id %in% names(sym_lookup),
                                     sym_lookup[gene_id], gene_id))
-    if (nrow(dea_per_sample_df) > 0) {
-        dea_per_sample_df <- dea_per_sample_df %>%
-            mutate(gene_symbol = ifelse(gene_id %in% names(sym_lookup),
-                                        sym_lookup[gene_id], gene_id))
-    }
 }
 
-out_dea        <- file.path(out_dir, "dea_results.tsv")
-out_dea_per    <- file.path(out_dir, "dea_results_per_sample.tsv")
-write_tsv(dea_df,             out_dea)
-write_tsv(dea_per_sample_df,  out_dea_per)
+out_dea <- file.path(out_dir, "dea_results.tsv")
+write_tsv(dea_df, out_dea)
 message("Wrote: ", out_dea)
-message("Wrote: ", out_dea_per)
 
 # ── Write TSV outputs ─────────────────────────────────────────────────────────
 # expression_matrix.tsv (primary — consumed by step 12)
@@ -415,34 +419,42 @@ out_long <- file.path(out_dir, "expression_by_sample.tsv")
 write_tsv(expr_long, out_long)
 message("Wrote: ", out_long)
 
-# ── QC PDF (PCA + size factors + volcano) ─────────────────────────────────────
-# Volcano plot: tumor vs normal DEA
+# ── QC PDF (PCA + size factors + per-contrast volcanos) ───────────────────────
+
+# Faceted volcano plot: one panel per contrast
 vol_df <- dea_df %>%
     mutate(
         gene_label = ifelse(direction != "NS" & abs(log2FoldChange) > 2 &
                             !is.na(padj) & padj < 0.01,
-                            coalesce(gene_symbol, gene_id), NA_character_)
+                            coalesce(gene_symbol, gene_id), NA_character_),
+        contrast = factor(contrast, levels = names(dea_contrasts))
     )
+
+n_up   <- sum(dea_df$direction == "UP",   na.rm = TRUE)
+n_down <- sum(dea_df$direction == "DOWN", na.rm = TRUE)
 
 fig_volcano <- ggplot(vol_df,
        aes(x = log2FoldChange, y = -log10(pvalue + 1e-300), colour = direction)) +
-    geom_point(size = 0.8, alpha = 0.6) +
-    ggrepel::geom_text_repel(aes(label = gene_label), size = 2.5,
-                              na.rm = TRUE, max.overlaps = 20) +
+    geom_point(size = 0.7, alpha = 0.5) +
+    ggrepel::geom_text_repel(aes(label = gene_label), size = 2.2,
+                              na.rm = TRUE, max.overlaps = 10) +
     scale_colour_manual(values = c("UP" = "#E41A1C", "DOWN" = "#377EB8", "NS" = "grey70")) +
     geom_vline(xintercept = c(-1, 1), linetype = "dashed", colour = "grey50") +
     geom_hline(yintercept = -log10(0.05), linetype = "dashed", colour = "grey50") +
-    labs(title = "Volcano: Tumor vs D0 Normal (all tumors pooled)",
+    facet_wrap(~ contrast, nrow = 2, scales = "free_y") +
+    labs(title = "Volcano plots per DEA contrast",
          x = "log2 Fold Change", y = "-log10(p-value)",
-         subtitle = sprintf("UP=%d  DOWN=%d  (padj<0.05, |log2FC|>1)",
-                            sum(dea_df$direction == "UP"),
-                            sum(dea_df$direction == "DOWN"))) +
-    theme_classic(base_size = 11) +
-    theme(plot.title = element_text(face = "bold"))
+         subtitle = sprintf("Total across all contrasts: UP=%d  DOWN=%d  (padj<0.05, |log2FC|>1)",
+                            n_up, n_down)) +
+    theme_classic(base_size = 9) +
+    theme(plot.title   = element_text(face = "bold"),
+          strip.text   = element_text(size = 7, face = "bold"),
+          legend.position = "bottom")
 
-combined_qc <- (fig_pca_before | fig_pca_after) / (fig_sf | fig_volcano) +
+# Page 1: PCA + size factors
+page1 <- (fig_pca_before | fig_pca_after) / (fig_sf | patchwork::plot_spacer()) +
     patchwork::plot_annotation(
-        title    = "RNASeq QC & DEA Report",
+        title    = "RNASeq QC Report — PCA & Size Factors",
         subtitle = sprintf("DESeq2 + VST + limma batch correction | %s",
                            format(Sys.time(), "%Y-%m-%d %H:%M")),
         theme = theme(
@@ -450,8 +462,22 @@ combined_qc <- (fig_pca_before | fig_pca_after) / (fig_sf | fig_volcano) +
             plot.subtitle = element_text(size = 9,  colour = "grey40"))
     )
 
+# Page 2: per-contrast volcano plots
+page2 <- fig_volcano +
+    patchwork::plot_annotation(
+        title    = "RNASeq DEA — Stage Contrasts",
+        subtitle = sprintf("DESeq2 design: ~ batch + stage | %s",
+                           format(Sys.time(), "%Y-%m-%d %H:%M")),
+        theme = theme(
+            plot.title    = element_text(size = 14, face = "bold"),
+            plot.subtitle = element_text(size = 9,  colour = "grey40"))
+    )
+
 out_qc <- file.path(out_dir, "rnaseq_qc.pdf")
-ggsave(out_qc, combined_qc, width = 16, height = 14, device = "pdf")
+pdf(out_qc, width = 16, height = 12)
+print(page1)
+print(page2)
+dev.off()
 message("Wrote: ", out_qc)
 
 # ── Upload to S3 ──────────────────────────────────────────────────────────────
@@ -460,9 +486,8 @@ if (nchar(s3_rnaseq) > 5) {
     system(paste("aws s3 cp", shQuote(out_primary), paste0(s3_rnaseq, "/expression_matrix.tsv")))
     system(paste("aws s3 cp", shQuote(out_full),    paste0(s3_rnaseq, "/expression_matrix_full.tsv")))
     system(paste("aws s3 cp", shQuote(out_long),    paste0(s3_rnaseq, "/expression_by_sample.tsv")))
-    system(paste("aws s3 cp", shQuote(out_qc),      paste0(s3_rnaseq, "/rnaseq_qc.pdf")))
-    system(paste("aws s3 cp", shQuote(out_dea),     paste0(s3_rnaseq, "/dea_results.tsv")))
-    system(paste("aws s3 cp", shQuote(out_dea_per), paste0(s3_rnaseq, "/dea_results_per_sample.tsv")))
+    system(paste("aws s3 cp", shQuote(out_qc),  paste0(s3_rnaseq, "/rnaseq_qc.pdf")))
+    system(paste("aws s3 cp", shQuote(out_dea), paste0(s3_rnaseq, "/dea_results.tsv")))
     message("S3 upload complete.")
 } else {
     message("[WARN] S3_RNASEQ_OUT not set — skipping S3 upload")

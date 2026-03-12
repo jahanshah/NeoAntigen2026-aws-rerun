@@ -1,12 +1,23 @@
 # RNASeq sample manifest
-# sample_id	wes_id	timepoint	batch	role	fastq_pattern
-443_D21_new	443_D21_new	D21	new	tumor	Day_21_New
-428_D20_new	428_D20_new	D20	new	tumor	Day_20_New
-34_D52_old	34_D52_old	D52	old	tumor	Day_52_Old
-D88_old	NA	D88	old	extra	Day_88_Old
-D99_old	NA	D99	old	extra	Sample_32.*Day_99.*Old
-36_D99_new	36_D99_new	D99	new	tumor	Sample_36.*Day_99.*New
-38_D99_new	38_D99_new	D99	new	tumor	Sample_38.*Day_99.*New
-D109_new	NA	D109	new	extra	Day_109_New
-42_D122_old	42_D122_old	D122	old	tumor	Day_122_Old
-423_D0_old	423_D0_old	D0	old	normal	Day_0_Old
+# Columns (tab-separated):
+#   sample_id   wes_id   timepoint   batch   role     stage           fastq_pattern
+#
+# stage groups (for DEA):
+#   normal      = D0 baseline reference
+#   early       = D20, D21 (early tumour response)
+#   transitioning = D52 (transitional)
+#   mid         = D88, D99 (established tumour)
+#   late        = D109, D122 (advanced/late-stage)
+#
+# batch: old = old library prep, new = new library prep
+# role:  normal | tumor | extra  (extra = RNASeq-only, no WES match)
+423_D0_old	423_D0_old	D0	old	normal	normal	Day_0_Old
+443_D21_new	443_D21_new	D21	new	tumor	early	Day_21_New
+428_D20_new	428_D20_new	D20	new	tumor	early	Day_20_New
+34_D52_old	34_D52_old	D52	old	tumor	transitioning	Day_52_Old
+D88_old	NA	D88	old	extra	mid	Day_88_Old
+D99_old	NA	D99	old	extra	mid	Sample_32.*Day_99.*Old
+36_D99_new	36_D99_new	D99	new	tumor	mid	Sample_36.*Day_99.*New
+38_D99_new	38_D99_new	D99	new	tumor	mid	Sample_38.*Day_99.*New
+D109_new	NA	D109	new	extra	late	Day_109_New
+42_D122_old	42_D122_old	D122	old	tumor	late	Day_122_Old

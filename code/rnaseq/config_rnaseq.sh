@@ -46,19 +46,21 @@ RNASEQ_SAMPLES=()
 declare -A RNASEQ_WES_IDS
 declare -A RNASEQ_BATCHES
 declare -A RNASEQ_ROLES
+declare -A RNASEQ_STAGES
 declare -A RNASEQ_PATTERNS
 
-while IFS=$'\t' read -r _sid _wes _tp _batch _role _pat; do
+while IFS=$'\t' read -r _sid _wes _tp _batch _role _stage _pat; do
     # Skip comment lines and blank lines
     [[ "${_sid}" =~ ^[[:space:]]*# || -z "${_sid}" ]] && continue
     RNASEQ_SAMPLES+=("${_sid}")
     RNASEQ_WES_IDS["${_sid}"]="${_wes}"
     RNASEQ_BATCHES["${_sid}"]="${_batch}"
     RNASEQ_ROLES["${_sid}"]="${_role}"
+    RNASEQ_STAGES["${_sid}"]="${_stage}"
     RNASEQ_PATTERNS["${_sid}"]="${_pat}"
 done < "${RNASEQ_META}"
 
-export RNASEQ_SAMPLES RNASEQ_WES_IDS RNASEQ_BATCHES RNASEQ_ROLES RNASEQ_PATTERNS
+export RNASEQ_SAMPLES RNASEQ_WES_IDS RNASEQ_BATCHES RNASEQ_ROLES RNASEQ_STAGES RNASEQ_PATTERNS
 
 # --- Ensure local output dirs exist ------------------------------------------
 mkdir -p "${RNASEQ_RESULTS}" "${RNASEQ_TMP}"

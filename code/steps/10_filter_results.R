@@ -34,13 +34,31 @@ for (pkg in c("ggplot2","dplyr","tidyr","readr","patchwork",
 }
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-BASE_DIR    <- "/home/ec2-user/results"
+# Use RESULTS_DIR env var (set by config.sh) if available; fall back to default.
+BASE_DIR    <- Sys.getenv("RESULTS_DIR",
+                           file.path(Sys.getenv("HOME", "/home/ec2-user"),
+                                     "results",
+                                     Sys.getenv("RUN_ID", "")))
+if (!nzchar(BASE_DIR) || !file.exists(dirname(BASE_DIR))) {
+    BASE_DIR <- "/home/ec2-user/results"
+}
 MHC_DIR     <- file.path(BASE_DIR, "netmhcpan")
 PEP_DIR     <- file.path(BASE_DIR, "peptides")
 PYCLONE_DIR <- file.path(BASE_DIR, "pyclone/tables")
 RNASEQ_DIR  <- file.path(BASE_DIR, "rnaseq")
 OUT_DIR     <- file.path(BASE_DIR, "final")
-S3_BASE     <- "s3://bam-wes/NeoAntigen-aws/results"
+
+# S3 paths — use S3_RESULTS env var (set by config.sh) if available;
+# otherwise construct from RUN_ID or fall back to new bucket root.
+run_id_env  <- Sys.getenv("RUN_ID", "")
+s3_results_env <- Sys.getenv("S3_RESULTS", "")
+S3_BASE     <- if (nzchar(s3_results_env)) {
+    s3_results_env
+} else if (nzchar(run_id_env)) {
+    paste0("s3://neoantigen2026-rerun/results/", run_id_env)
+} else {
+    "s3://neoantigen2026-rerun/results"
+}
 S3_OUT      <- file.path(S3_BASE, "final")
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
@@ -52,7 +70,7 @@ s3_fetch <- function(s3_path, local_path) {
 
 # ── Load netMHCpan predictions ────────────────────────────────────────────────
 mhc_file <- file.path(MHC_DIR, "all_predictions.tsv")
-s3_fetch(paste0(S3_BASE, "/netmhcpan/all_predictions.tsv"), mhc_file)
+s3_fetch(file.path(S3_BASE, "netmhcpan/all_predictions.tsv"), mhc_file)
 if (!file.exists(mhc_file)) stop("netMHCpan predictions not found. Run Step 9 first.")
 
 mhc <- read_tsv(mhc_file, show_col_types = FALSE) %>%
@@ -68,8 +86,8 @@ message(sprintf("netMHCpan: %d binder rows (SB+WB)", nrow(mhc)))
 load_pep_meta <- function() {
     wes <- file.path(PEP_DIR, "all_peptides.tsv")
     fus <- file.path(PEP_DIR, "fusions_all.tsv")
-    s3_fetch(paste0(S3_BASE, "/peptides/all_peptides.tsv"), wes)
-    s3_fetch(paste0(S3_BASE, "/peptides/fusions_all.tsv"), fus)
+    s3_fetch(file.path(S3_BASE, "peptides/all_peptides.tsv"), wes)
+    s3_fetch(file.path(S3_BASE, "peptides/fusions_all.tsv"), fus)
     dfs <- list()
     if (file.exists(wes)) dfs[["wes"]] <- read_tsv(wes, show_col_types = FALSE)
     if (file.exists(fus)) dfs[["fus"]] <- read_tsv(fus, show_col_types = FALSE)
@@ -107,8 +125,8 @@ if (!is.null(pep_meta)) {
 # ── Load PyClone clonality ────────────────────────────────────────────────────
 loci_f <- file.path(PYCLONE_DIR, "loci_clusters.tsv")
 cp_f   <- file.path(PYCLONE_DIR, "cluster_prevalence.tsv")
-s3_fetch(paste0(S3_BASE, "/pyclone/tables/loci_clusters.tsv"),     loci_f)
-s3_fetch(paste0(S3_BASE, "/pyclone/tables/cluster_prevalence.tsv"), cp_f)
+s3_fetch(file.path(S3_BASE, "pyclone/tables/loci_clusters.tsv"),     loci_f)
+s3_fetch(file.path(S3_BASE, "pyclone/tables/cluster_prevalence.tsv"), cp_f)
 
 if (file.exists(loci_f) && file.exists(cp_f)) {
     loci   <- read_tsv(loci_f, show_col_types = FALSE)
@@ -129,7 +147,7 @@ if (file.exists(loci_f) && file.exists(cp_f)) {
 
 # ── Load RNASeq expression ────────────────────────────────────────────────────
 expr_f <- file.path(RNASEQ_DIR, "expression_matrix.tsv")
-s3_fetch(paste0(S3_BASE, "/rnaseq/expression_matrix.tsv"), expr_f)
+s3_fetch(file.path(S3_BASE, "rnaseq/expression_matrix.tsv"), expr_f)
 
 if (file.exists(expr_f)) {
     expr_wide <- read_tsv(expr_f, show_col_types = FALSE)

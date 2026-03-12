@@ -86,7 +86,7 @@ export PEPTIDE_LENGTHS="8,9,10"
 #   r5.2xlarge (8 vCPU,  64GB):  THREADS=6,  JAVA_OPTS="-Xmx24g"
 #   r5.4xlarge (16 vCPU, 128GB): THREADS=12, JAVA_OPTS="-Xmx40g"
 #   Current:   16 vCPU, 30GB EBS root + /scratch EBS volume
-export THREADS=12
+export THREADS=16
 export JAVA_OPTS="-Xmx20g"
 
 # --- Utility functions -------------------------------------------------------

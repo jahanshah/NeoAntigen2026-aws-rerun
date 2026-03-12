@@ -151,7 +151,15 @@ run_step  7  "07_pyclone_tables.R"    "PyClone cluster/loci tables + figures"
 run_step  8  "08_peptide_extract.py"  "Extract 8/9/10-mer missense/frameshift peptides"
 run_step  9  "08b_fusion_peptides.py" "Extract fusion junction peptides (Arriba)"
 run_step 10  "09_netmhcpan.sh"        "netMHCpan H-2Kb/H-2Db binding prediction"
-run_step 11  "11_rnaseq_expression.R" "RNASeq batch correction + expression matrix"
+# Step 11 (11_rnaseq_expression.R) has been replaced by the parallel RNASeq
+# pipeline (code/rnaseq/run_rnaseq_pipeline.sh), which runs STAR alignment,
+# featureCounts quantification, DESeq2 normalization, and limma batch correction
+# concurrently with the WES steps above.  run_rnaseq_pipeline.sh also polls for
+# the netMHCpan output and triggers step 12 itself once both data sources are
+# ready.  If you are running run_pipeline.sh standalone (without the RNASeq
+# pipeline), step 12 below will still execute using whatever expression data is
+# already present in ${RNASEQ_RESULTS}/expression_matrix.tsv; it handles missing
+# expression data gracefully.
 run_step 12  "10_filter_results.R"    "Rank candidates (binding + clonality + expression)"
 
 log ""

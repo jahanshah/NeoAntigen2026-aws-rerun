@@ -1,0 +1,20 @@
+# NeoAntigen pipeline sample manifest
+# Columns (tab-separated):
+#   sample_id   role            sm_tag      timepoint  library
+#
+# role values (comma-separated):
+#   normal      = matched normal used as -normal in Mutect2
+#   pon         = included in Panel of Normals construction
+#   tumor       = tumour sample to call somatic variants on
+#
+# sm_tag must match the @RG SM field in the BAM header exactly.
+# timepoint is the day post-treatment (used for PyClone ordering).
+# library: old = old library prep batch, new = new library prep batch
+423_D0_old	normal,pon	D0_old	D0	old
+424_D0__old	pon	D0+_old	D0	old
+443_D21_new	tumor	D21_new	D21	new
+428_D20_new	tumor	D20_new	D20	new
+34_D52_old	tumor	D52_old	D52	old
+36_D99_new	tumor	D99_new_36	D99	new
+38_D99_new	tumor	D99_new	D99	new
+42_D122_old	tumor	D122_old	D122	old

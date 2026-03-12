@@ -2,9 +2,11 @@
 # =============================================================================
 # NeoAntigen Pipeline — Main Orchestrator
 #
+# Sample manifest : code/samples.tsv  (edit there to add/remove samples)
+#
 # Execution model — optimised for minimal wall-clock time:
 #
-#   Phase 1 │ Preprocess D0 normals (423 + 424)   ← needed by PoN + Mutect2
+#   Phase 1 │ Preprocess PoN normals (role=normal,pon) ← needed by PoN + Mutect2
 #   ─────────┼──────────────────────────────────────────────────────────────
 #   Phase 2a │ Build PoN (step 2, background)       ← starts immediately
 #   Phase 2b │ Preprocess tumour samples (step 1)   ← runs in foreground
@@ -35,8 +37,10 @@ END=${2:-12}
 
 log "============================================================"
 log "NeoAntigen Pipeline  RUN_ID=${RUN_ID}"
-log "Steps: ${START} → ${END}"
-log "Normal:  ${NORMAL_SAMPLE}"
+log "Steps:   ${START} → ${END}"
+log "Manifest: ${SAMPLES_META}"
+log "Normal:  ${NORMAL_SAMPLE} (SM: ${NORMAL_SM})"
+log "PoN:     ${PON_NORMALS[*]}"
 log "Tumours: ${TUMOR_SAMPLES[*]}"
 log "S3:      ${S3_RESULTS}"
 log "============================================================"
@@ -74,15 +78,16 @@ if [[ ${START} -le 1 && ${END} -ge 1 ]]; then
     log "Step 1 — BAM Preprocessing (phased: normals first, then tumours)"
     log "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-    # ── Phase 1a: preprocess D0 normals ──────────────────────────────────────
-    # Both normals are needed before PoN can be built. Process them first,
-    # sequentially (disk constraint), before launching any tumour work.
-    log "[Phase 1a] Preprocessing D0 normals..."
-    SAMPLE_FILTER="${NORMAL_SAMPLE} ${PON_NORMALS[1]}" \
+    # ── Phase 1a: preprocess PoN normals ─────────────────────────────────────
+    # All samples with role=pon (from samples.tsv) are needed before PoN can
+    # be built. Process them first, sequentially (disk constraint), before
+    # launching any tumour work.
+    log "[Phase 1a] Preprocessing PoN normals: ${PON_NORMALS[*]}"
+    SAMPLE_FILTER="${PON_NORMALS[*]}" \
     NON_INTERACTIVE=1 \
         bash "${STEPS_DIR}/01_bam_preprocess.sh"
 
-    log "[Phase 1a] D0 normals ready."
+    log "[Phase 1a] Normals ready."
 fi
 
 # =============================================================================

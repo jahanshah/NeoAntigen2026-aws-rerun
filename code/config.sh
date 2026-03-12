@@ -46,25 +46,35 @@ export PICARD="${CONDA_BIN}/picard"
 export SNPEFF="${CONDA_BIN}/snpEff"
 export NETMHCPAN="${CONDA_BIN}/netMHCpan"
 
-# --- Samples -----------------------------------------------------------------
-export NORMAL_SAMPLE="423_D0_old"
-export NORMAL_SM="D0_old"
-export PON_NORMALS=("423_D0_old" "424_D0__old")
-declare -A PON_SM_TAGS
-PON_SM_TAGS["423_D0_old"]="D0_old"
-PON_SM_TAGS["424_D0__old"]="D0+_old"
-export PON_SM_TAGS
+# --- Samples (loaded from manifest) -----------------------------------------
+# Edit code/samples.tsv to add/remove/rename samples.
+# Columns: sample_id  role  sm_tag  timepoint  library
+# Roles (comma-separated): normal | pon | tumor
+export SAMPLES_META="${CODE_DIR}/samples.tsv"
 
-# Tumour samples — ordered by timepoint
-export TUMOR_SAMPLES=("443_D21_new" "428_D20_new" "34_D52_old" "36_D99_new" "38_D99_new" "42_D122_old")
+TUMOR_SAMPLES=()
+PON_NORMALS=()
 declare -A TUMOR_SM_TAGS
-TUMOR_SM_TAGS["443_D21_new"]="D21_new"
-TUMOR_SM_TAGS["428_D20_new"]="D20_new"
-TUMOR_SM_TAGS["34_D52_old"]="D52_old"
-TUMOR_SM_TAGS["36_D99_new"]="D99_new_36"
-TUMOR_SM_TAGS["38_D99_new"]="D99_new"
-TUMOR_SM_TAGS["42_D122_old"]="D122_old"
-export TUMOR_SM_TAGS
+declare -A PON_SM_TAGS
+
+while IFS=$'\t' read -r _sid _role _sm _tp _lib; do
+    # skip comment and blank lines
+    [[ "${_sid}" =~ ^[[:space:]]*# || -z "${_sid}" ]] && continue
+    if [[ "${_role}" == *"normal"* ]]; then
+        export NORMAL_SAMPLE="${_sid}"
+        export NORMAL_SM="${_sm}"
+    fi
+    if [[ "${_role}" == *"pon"* ]]; then
+        PON_NORMALS+=("${_sid}")
+        PON_SM_TAGS["${_sid}"]="${_sm}"
+    fi
+    if [[ "${_role}" == *"tumor"* ]]; then
+        TUMOR_SAMPLES+=("${_sid}")
+        TUMOR_SM_TAGS["${_sid}"]="${_sm}"
+    fi
+done < "${SAMPLES_META}"
+
+export PON_NORMALS PON_SM_TAGS TUMOR_SAMPLES TUMOR_SM_TAGS
 
 # MHC alleles (C57BL/6 H-2b haplotype)
 export MHC_ALLELES="H-2-Kb,H-2-Db"

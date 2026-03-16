@@ -1,0 +1,278 @@
+rank	sample	gene	hgvsp	effect	peptide	length	is_frameshift	mut_id	cluster_id	sample_prevalence	mean_prevalence	n_samples_present	log2cpm	composite_score	clone_pct	expr_pct	best_rank_el	mhc_score
+1	36_D99_new	Vps13b	p.Leu1113Pro	missense_variant	TSIPGTPVL	9	False	chr15:35607260:T:C		0.0	0.0		8.0445	0.7677	0.5001	0.9426	0.09	0.9479
+2	38_D99_new	Tent4b	p.Thr504Met	missense_variant	SCMGNGVTL	9	False	chr8:88252223:C:T		0.0	0.0		5.9738	0.7481	0.5001	0.7829	0.03	0.9788
+3	36_D99_new	Birc6	p.Gly4141Asp	missense_variant	VTIEQSDEL	9	False	chr17:74660467:G:A		0.0	0.0		9.7598	0.742	0.5001	0.9879	0.17	0.861
+4	36_D99_new	Tent4b	p.Thr504Met	missense_variant	SCMGNGVTL	9	False	chr8:88252223:C:T		0.0	0.0		5.6492	0.7363	0.5001	0.7237	0.03	0.9788
+5	36_D99_new	Hmgcs2	p.Arg206fs	frameshift_variant	AAPQVVLGL	9	True	chr3:98296189:GC:G		0.0	0.0		9.1447	0.7306	0.5001	0.9774	0.21	0.8378
+6	42_D122_old	Tcirg1	p.Ala564Ser	missense_variant	VHFGQSHRL	9	False	chr19:3897668:C:A		0.0	0.0		6.6203	0.723	0.5001	0.8735	0.16	0.8707
+7	34_D52_old	Msr1	p.Lys110Asn	missense_variant	SNVEMRFTI	9	False	chr8:39624238:T:G		0.0	0.0		7.0376	0.7207	0.5001	0.9008	0.19	0.8514
+8	36_D99_new	BC017158	p.Phe186Leu	missense_variant	MAPMYPIL	8	False	chr7:128288302:A:G		0.0	0.0		5.021	0.709	0.5001	0.6297	0.06	0.9575
+9	36_D99_new	Plxnb2	p.Lys1180Thr	missense_variant	NLPEFIVTF	9	False	chr15:89160503:T:G		0.0	0.0		9.7577	0.7042	0.5001	0.9844	0.3	0.7683
+10	42_D122_old	Men1	p.Ser518Leu	missense_variant	INLSAIKL	8	False	chr19:6339871:C:T		0.0	0.0		4.4805	0.6965	0.5001	0.5867	0.09	0.9479
+11	36_D99_new	Fzd8	p.Ile489Thr	missense_variant	VTYLFIGTM	9	False	chr18:9214385:T:C		0.0	0.0		3.9624	0.6965	0.5001	0.494	0.01	0.9942
+13	36_D99_new	Ephb3	p.Lys809Arg	missense_variant	IAYRRFTSA	9	False	chr16:21221679:A:G		0.0	0.0		4.1936	0.691	0.5001	0.5323	0.05	0.9614
+16	36_D99_new	Nisch	p.Lys902Arg	missense_variant	RSAAIPYWL	9	False	chr14:31176717:T:C		0.0	0.0		8.9092	0.6636	0.5001	0.9705	0.46	0.6737
+18	36_D99_new	Ubr4	p.Leu3993Pro	missense_variant	LSPFLMAV	8	False	chr4:139462411:T:C		0.0	0.0		9.2248	0.6626	0.5001	0.9809	0.47	0.666
+19	428_D20_new	Zfp984	p.Gly503Ser	missense_variant	SSLRIHQRI	9	False	chr4:147754886:C:T		0.0	0.0		4.089	0.6605	0.5001	0.5149	0.14	0.8938
+22	34_D52_old	Foxred2	p.Asn492Thr	missense_variant	INMEYGKTF	9	False	chr15:77947137:T:G		0.0	0.0		3.4554	0.6549	0.5001	0.4522	0.13	0.9112
+24	36_D99_new	Slc24a2	p.Val220Phe	missense_variant	SAVFNILFF	9	False	chr4:87227158:C:A		0.0	0.0		0.7903	0.6504	0.5001	0.2944	0.03	0.9788
+25	42_D122_old	Taf6l	p.Ser115Asn	missense_variant	VNLVELAL	8	False	chr19:8782606:C:T		0.0	0.0		4.7076	0.6433	0.5001	0.6024	0.24	0.8069
+26	42_D122_old	Tkfc	p.Phe252Ser	missense_variant	SNISHVPV	8	False	chr19:10596218:A:G		0.0	0.0		3.3559	0.6412	0.5001	0.4452	0.15	0.8803
+27	428_D20_new	Slc9c1	p.Pro959Gln	missense_variant	HQLPHTEYL	9	False	chr16:45593386:C:A		0.0	0.0		0.3245	0.64	0.5001	0.2422	0.03	0.9788
+28	36_D99_new	Scube1	p.Asn258Thr	missense_variant	TSPGSFQCL	9	False	chr15:83629452:T:G		0.0	0.0		4.9352	0.6397	0.5001	0.6192	0.26	0.7896
+29	42_D122_old	Mrpl49	p.Leu6Phe	missense_variant	AAVFRAAL	8	False	chr19:6057719:C:G		0.0	0.0		4.3261	0.6373	0.5001	0.5492	0.23	0.8185
+30	34_D52_old	Ubtd2	p.Glu28Asp	missense_variant	VALGDNQPL	9	False	chr11:32516103:G:T		0.0	0.0		3.5651	0.6372	0.5001	0.4636	0.17	0.861
+31	42_D122_old	Pcx	p.Tyr188Phe	missense_variant	NTFGFPII	8	False	chr19:4602546:A:T		0.0	0.0		5.4783	0.6368	0.5001	0.6976	0.34	0.7432
+34	36_D99_new	Adam3	p.Leu72Arg	missense_variant	QSFLHPRF	8	False	chr8:24719476:A:C		0.0	0.0		0.5027	0.6341	0.5001	0.2631	0.08	0.9537
+35	42_D122_old	Rasgrp2	p.Arg233Lys	missense_variant	HVAEKLLQL	9	False	chr19:6404939:G:A		0.0	0.0		5.4421	0.632	0.5001	0.6889	0.35	0.7355
+36	42_D122_old	Chka	p.Phe193Tyr	missense_variant	LGPKLYGIF	9	False	chr19:3884545:T:A		0.0	0.0		7.008	0.632	0.5001	0.8973	0.59	0.6313
+39	36_D99_new	Pou4f2	p.Pro162Ser	missense_variant	VSISHPSAL	9	False	chr8:78435489:G:A		0.0	0.0		0.143	0.6284	0.5001	0.2073	0.04	0.9672
+43	42_D122_old	5430427O19Rik	p.Glu282Gly	missense_variant	SGISTPSL	8	False	chrX:85888674:A:G		0.0	0.0		3.7416	0.6226	0.5001	0.4758	0.23	0.8185
+44	42_D122_old	Unc93b1	p.Ala595Thr	missense_variant	AGPLGTEPA	9	False	chr19:3948865:G:A		0.0	0.0		7.136	0.6179	0.5001	0.9078	0.68	0.5907
+45	36_D99_new	Olfr1350	p.Ala272Val	missense_variant	VAIFYSIL	8	False	chr7:6570807:C:T		0.0	0.0		0.0	0.6169	0.5001	0.0959	0.01	0.9942
+46	42_D122_old	Gm960	p.Lys224Asn	missense_variant	YGGLNFNKF	9	False	chr19:4692465:C:G		0.0	0.0		0.7877	0.615	0.5001	0.2874	0.14	0.8938
+47	42_D122_old	Slc22a28	p.Asn226Ser	missense_variant	TSPKFLGM	8	False	chr19:8116890:T:C		0.0	0.0		0.0	0.6146	0.5001	0.0959	0.02	0.9884
+48	42_D122_old	Fads1	p.Val369Ile	missense_variant	TQLQATCNI	9	False	chr19:10194336:G:A		0.0	0.0		6.44	0.6127	0.5001	0.8509	0.63	0.6062
+50	36_D99_new	Mug2	p.Phe1120Ser	missense_variant	SVYTKALM	8	False	chr6:122078718:T:C		0.0	0.0		0.0	0.6061	0.5001	0.0959	0.04	0.9672
+53	36_D99_new	Nrap	p.Lys841Thr	missense_variant	STMSHSLQM	9	False	chr19:56347223:T:G		0.0	0.0		0.143	0.599	0.5001	0.2073	0.14	0.8938
+54	42_D122_old	Ppp1r32	p.Thr69Ala	missense_variant	VSYQPHLDAL	10	False	chr19:10481725:T:C		0.0	0.0		1.1507	0.5986	0.5001	0.3327	0.22	0.8301
+57	42_D122_old	Slc22a29	p.Pro227Thr	missense_variant	TSTKFLAM	8	False	chr19:8207157:G:T		0.0	0.0		0.0	0.5945	0.5001	0.0959	0.1	0.9382
+63	42_D122_old	Doc2g	p.Val268Ala	missense_variant	VGVLRCAHL	9	False	chr19:4006216:T:C		0.0	0.0		0.9699	0.5806	0.5001	0.3083	0.25	0.7973
+66	42_D122_old	Ctsf	p.Pro3Leu	missense_variant	MALLLQLL	8	False	chr19:4855275:C:T		0.0	0.0		2.995	0.5779	0.5001	0.4185	0.35	0.7355
+67	36_D99_new	Olfr1087	p.Lys80Thr	missense_variant	VGPTMLVNF	9	False	chr2:86690735:T:G		0.0	0.0		0.0	0.5767	0.5001	0.0959	0.14	0.8938
+68	42_D122_old	Carns1	p.Val776Met	missense_variant	LAPEQEAQM	9	False	chr19:4165856:C:T		0.0	0.0		3.2586	0.5747	0.5001	0.433	0.38	0.7201
+69	36_D99_new	Hcfc1	p.Gln1232His	missense_variant	RHPETYHTY	9	False	chrX:73949862:T:G		0.0	0.0		8.2962	0.5729	0.5001	0.9496	0.95	0.4575
+71	36_D99_new	Olfr137	p.Phe84Cys	missense_variant	SVPQLLCNL	9	False	chr17:38305209:A:C		0.0	0.0		0.0	0.5713	0.5001	0.0959	0.15	0.8803
+76	42_D122_old	Dpp3	p.Ala348Val	missense_variant	RLVVSAEQL	9	False	chr19:4917032:G:A		0.0	0.0		5.64	0.5685	0.5001	0.715	0.77	0.5637
+77	443_D21_new	Mtmr14	p.Ala12fs	frameshift_variant	AAASGARAL	9	True	chr6:113237987:GCCGCCGCCTCGGCGGGTTCCACCGCCTCGTCGGGCAGC:G		0.0	0.0		5.2599	0.568	0.5001	0.6662	0.71	0.5869
+80	42_D122_old	Lrfn4	p.Thr503Asn	missense_variant	STLPANPL	8	False	chr19:4612480:G:T		0.0	0.0		3.2932	0.5641	0.5001	0.4417	0.44	0.6892
+81	428_D20_new	Cyp2w1	p.Thr304Met	missense_variant	MVMAGTETM	9	False	chr5:139356132:C:T		0.0	0.0		0.0	0.5636	0.5001	0.0959	0.17	0.861
+82	428_D20_new	Slc15a2	p.Met210Thr	missense_variant	SLISTFITPM	10	False	chr16:36772445:A:G		0.0	0.0		6.6109	0.5629	0.5001	0.8683	0.94	0.473
+83	428_D20_new	Olfr483	p.Phe43Ser	missense_variant	VTVSGNLSTI	10	False	chr7:108103438:T:C		0.0	0.0		0.0	0.5597	0.5001	0.0959	0.19	0.8514
+85	42_D122_old	Wdr91	p.Val665Asp	missense_variant	YSGYKQDQV	9	False	chr6:34884272:A:T		0.0	0.0		5.5363	0.5579	0.5001	0.7046	0.8	0.5425
+88	42_D122_old	Cdc42bpg	p.Thr418Ala	missense_variant	GAPHCVEQV	9	False	chr19:6313265:A:G		0.0	0.0		4.1649	0.5573	0.5001	0.5236	0.59	0.6313
+90	42_D122_old	Mrpl21	p.Ala200Val	missense_variant	SGYLCLSV	8	False	chr19:3292469:C:T		0.0	0.0		3.9674	0.5567	0.5001	0.4975	0.57	0.6429
+94	42_D122_old	Tm7sf2	p.Val298Ala	missense_variant	KAIGYYIF	8	False	chr19:6063607:A:G		0.0	0.0		1.8769	0.5537	0.5001	0.3589	0.42	0.7046
+99	36_D99_new	L3hypdh	p.Asp345His	missense_variant	LTVEDGHPL	9	False	chr12:72073943:C:G		0.0	0.0		1.6249	0.545	0.5001	0.3467	0.44	0.6892
+105	42_D122_old	Acy3	p.Gln170Arg	missense_variant	SIRKNGICL	9	False	chr19:3988676:A:G		0.0	0.0		3.6377	0.5363	0.5001	0.4688	0.63	0.6062
+106	36_D99_new	St8sia3	p.Leu222Arg	missense_variant	KYYNNRLTI	9	False	chr18:64269788:T:G		0.0	0.0		0.0	0.535	0.5001	0.0959	0.26	0.7896
+113	34_D52_old	Radil	p.Arg832His	missense_variant	YIHHFLWGL	9	False	chr5:142487517:C:T		0.0	0.0		0.2307	0.5193	0.5001	0.2178	0.44	0.6892
+118	38_D99_new	Slc15a2	p.Met210Thr	missense_variant	SLISTFITPM	10	False	chr16:36772445:A:G		0.0	0.0		4.9459	0.5141	0.5001	0.6244	0.94	0.473
+123	42_D122_old	Gal3st3	p.His17Arg	missense_variant	MSRRKILLL	9	False	chr19:5302596:A:G		0.0	0.0		0.7129	0.4878	0.5001	0.2805	0.73	0.5792
+126	428_D20_new	Zfp980	p.Ile324Val	missense_variant	SHLSVHRRI	9	False	chr4:145701672:A:G		0.0	0.0		0.3245	0.477	0.5001	0.2422	0.74	0.5714
+127	42_D122_old	Ccdc87	p.Arg822His	missense_variant	QQQRRIHNL	9	False	chr19:4841946:G:A		0.0	0.0		0.0	0.4763	0.5001	0.0959	0.57	0.6429
+130	42_D122_old	Tbx10	p.Ser236Gly	missense_variant	YQNHRGTQL	9	False	chr19:3998525:A:G		0.0	0.0		0.0	0.4686	0.5001	0.0959	0.6	0.6236
+131	42_D122_old	Gm960	p.Arg130Pro	missense_variant	VGALPVEAL	9	False	chr19:4698280:C:G		0.0	0.0		0.7877	0.4676	0.5001	0.2874	0.86	0.5251
+133	42_D122_old	Ccdc87	p.Leu265Phe	missense_variant	QLFWVPSM	8	False	chr19:4840274:C:T		0.0	0.0		0.0	0.4655	0.5001	0.0959	0.62	0.6158
+140	34_D52_old	Slc15a2	p.Met210Thr	missense_variant	SLISTFITPM	10	False	chr16:36772445:A:G		0.0	0.0		1.2288	0.4572	0.5001	0.3397	0.94	0.473
+141	36_D99_new	Fam170b	p.Pro340Ser	missense_variant	KQQPLQSL	8	False	chr14:32836227:C:T		0.0	0.0		1.03	0.4562	0.5001	0.3118	0.93	0.4846
+142	42_D122_old	Atg2a	p.Arg194Gln	missense_variant	VQVQRLEYC	9	False	chr19:6245139:G:A		0.0	0.0		5.9098	0.4562	0.5001	0.7673	1.4	0.2568
+143	38_D99_new	Samd5	p.Ala84Thr	missense_variant	PQPVPPTPL	9	False	chr10:9674714:C:T		0.0	0.0		0.4116	0.456	0.5001	0.2526	0.87	0.5135
+147	42_D122_old	Rbm4	p.Leu316Pro	missense_variant	RATGPVPTV	9	False	chr19:4787508:A:G		0.0	0.0		5.0362	0.4475	0.5001	0.6349	1.3	0.3012
+148	42_D122_old	Cd248	p.Ser525Pro	missense_variant	RPPPYQPPI	9	False	chr19:5069698:T:C		0.0	0.0		4.4014	0.447	0.5001	0.5555	1.2	0.3398
+149	36_D99_new	Maml1	p.Gln646Leu	missense_variant	QLLQQQQFL	9	False	chr11:50263299:T:A		0.0	0.0		6.2739	0.4469	0.5001	0.8021	1.5	0.2162
+150	36_D99_new	Dmxl2	p.Lys245Arg	missense_variant	FSWRKTSRYM	10	False	chr9:54460951:T:C		0.0	0.0		6.0831	0.4448	0.5001	0.7916	1.5	0.2162
+151	42_D122_old	Ccdc87	p.Pro213Leu	missense_variant	IPWLHSTGL	9	False	chr19:4840119:C:T		0.0	0.0		0.0	0.4408	0.5001	0.0959	0.78	0.5541
+154	34_D52_old	Shroom3	p.Arg882His	missense_variant	HLLRSQSTF	9	False	chr5:92942037:G:A		0.0	0.0		3.9997	0.4375	0.5001	0.5079	1.2	0.3398
+157	42_D122_old	Zkscan7	p.Lys404Asn	missense_variant	HTQENPYEC	9	False	chr9:122895179:A:C		0.0	0.0		2.4678	0.4337	0.5001	0.3885	1.1	0.39
+158	428_D20_new	Vps13d	p.Arg506Trp	missense_variant	LQWGTVTLL	9	False	chr4:145167472:G:A		0.0	0.0		8.7523	0.4315	0.5001	0.9565	1.8	0.1004
+159	42_D122_old	Aldh3b1	p.Arg170Pro	missense_variant	GGPQETGQL	9	False	chr19:3920850:C:G		0.0	0.0		4.3612	0.4309	0.5001	0.5521	1.3	0.3012
+160	36_D99_new	Prkar1b	p.Arg243Cys	missense_variant	STLRKCKM	8	False	chr5:139042477:G:A		0.0	0.0		3.687	0.4304	0.5001	0.4723	1.2	0.3398
+169	36_D99_new	Erich5	p.Lys34Met	missense_variant	STVEHNMF	8	False	chr15:34470727:A:T		0.0	0.0		0.2731	0.4234	0.5001	0.2247	0.97	0.4459
+173	42_D122_old	Atp5e	p.Ser49Ala	missense_variant	SSIKIVKVA	9	False	chr2:174462517:A:C		0.0	0.0		4.4673	0.4185	0.5001	0.579	1.4	0.2568
+174	428_D20_new	Muc4	p.Ser793Leu	missense_variant	GSTPATTQVL	10	False	chr16:32752501:C:T		0.0	0.0		4.4553	0.4173	0.5001	0.573	1.4	0.2568
+176	42_D122_old	Zp1	p.Val445Leu	missense_variant	RTDPSLVLL	9	False	chr19:10916507:C:A		0.0	0.0		0.0	0.413	0.5001	0.0959	0.93	0.4846
+177	36_D99_new	Polr3e	p.His598Arg	missense_variant	AGLPPGRIL	9	False	chr7:120940746:A:G		0.0	0.0		5.5044	0.409	0.5001	0.7011	1.6	0.1718
+178	42_D122_old	Syvn1	p.Met287Val	missense_variant	LQAVDNVCII	10	False	chr19:6050359:A:G		0.0	0.0		4.1742	0.4085	0.5001	0.5288	1.4	0.2568
+179	42_D122_old	Cdc42bpg	p.Arg1065Gln	missense_variant	QVLGELQQL	9	False	chr19:6318467:G:A		0.0	0.0		4.1649	0.4075	0.5001	0.5236	1.4	0.2568
+186	36_D99_new	Neb	p.Ile2578Val	missense_variant	WSMHVAKV	8	False	chr2:52258802:T:C		0.0	0.0		5.9362	0.395	0.5001	0.7742	1.8	0.1004
+194	42_D122_old	Aldh3b2	p.Thr240Ile	missense_variant	IVANRVAWF	9	False	chr19:3979347:C:T		0.0	0.0		0.8354	0.3801	0.5001	0.2979	1.3	0.3012
+197	42_D122_old	Rasgrp2	p.Pro562Ser	missense_variant	SSPSPTHTH	9	False	chr19:6413957:C:T		0.0	0.0		5.4421	0.378	0.5001	0.6889	1.8	0.1004
+198	428_D20_new	Olfr1472	p.Asn168His	missense_variant	HSNVINHFF	9	False	chr19:13454014:T:G		0.0	0.0		0.0	0.3752	0.5001	0.0959	1.1	0.39
+198	36_D99_new	Olfr1186	p.Lys87Gln	missense_variant	KQIITYNECM	10	False	chr2:88525843:A:C		0.0	0.0		0.0	0.3752	0.5001	0.0959	1.1	0.39
+209	428_D20_new	Ifi211	p.Asn98fs	frameshift_variant	KMVKKQVL	8	True	chr1:173906300:AT:A		0.0	0.0		3.8064	0.3661	0.5001	0.4866	1.6	0.1718
+218	42_D122_old	Slc22a29	p.Leu288Val	missense_variant	VINKPQKGL	9	False	chr19:8193490:A:C		0.0	0.0		0.0	0.3551	0.5001	0.0959	1.2	0.3398
+222	42_D122_old	Cd5	p.Gln82Glu	missense_variant	KELRCGDPL	9	False	chr19:10726453:G:C		0.0	0.0		2.4138	0.3457	0.5001	0.385	1.6	0.1718
+230	42_D122_old	Carns1	p.Val143Ala	missense_variant	AALLVSKAV	9	False	chr19:4171827:A:G		0.0	0.0		3.2586	0.3268	0.5001	0.433	1.8	0.1004
+232	42_D122_old	Snx15	p.Thr20Ile	missense_variant	IHPKGYTEY	9	False	chr19:6128089:G:A		0.0	0.0		3.241	0.3257	0.5001	0.4278	1.8	0.1004
+233	42_D122_old	Ppp1r32	p.Leu107Met	missense_variant	KQPLPWNM	8	False	chr19:10481346:G:T		0.0	0.0		1.1507	0.3229	0.5001	0.3327	1.7	0.1409
+234	42_D122_old	Slc22a12	p.Leu407Phe	missense_variant	FCQVSFLVL	9	False	chr19:6537704:G:A		0.0	0.0		0.0	0.3219	0.5001	0.0959	1.4	0.2568
+238	42_D122_old	Zp1	p.Arg486Lys	missense_variant	AADKEALPF	9	False	chr19:10916285:C:T		0.0	0.0		0.0	0.3057	0.5001	0.0959	1.5	0.2162
+242	34_D52_old	Chd5	p.Arg1298Leu	missense_variant	FKVAQYVVL	9	False	chr4:152377125:G:T		0.0	0.0		1.7952	0.2909	0.5001	0.3501	1.9	0.0521
+243	42_D122_old	Gm9573	p.Pro195Leu	missense_variant	STASGSTPTL	10	False	chr17:35622709:G:A		0.0	0.0		0.0	0.2879	0.5001	0.0959	1.6	0.1718
+246	42_D122_old	Znhit2	p.Gly89Arg	missense_variant	RARPGGLSGL	10	False	chr19:6061491:G:A		0.0	0.0		2.8221	0.2875	0.5001	0.4024	2.0	0.0174
+249	428_D20_new	Chd5	p.Arg1298Leu	missense_variant	FKVAQYVVL	9	False	chr4:152377125:G:T		0.0	0.0		0.5893	0.2752	0.5001	0.2718	1.9	0.0521
+250	42_D122_old	Npas4	p.Phe309Ile	missense_variant	ITANNYPI	8	False	chr19:4987340:A:T		0.0	0.0		0.4622	0.2728	0.5001	0.2596	1.9	0.0521
+	443_D21_new	Rrs1	p.Ala164Ser	missense_variant	LIEVPGSS	8	False	chr1:9546013:G:T		0.0	0.0		6.3484		0.5001	0.8456		
+	443_D21_new	Rrs1	p.Asp165Asn	missense_variant	IEVPGSAN	8	False	chr1:9546016:G:A		0.0	0.0		6.3484		0.5001	0.8456		
+	443_D21_new	Itga7	p.Ala863Val	missense_variant	SLNTLGSV	8	False	chr10:128950003:C:T		0.0	0.0		2.4876		0.5001	0.3919		
+	443_D21_new	Nacad	p.Asp1294_Leu1323del	disruptive_inframe_deletion	GESSSEL_	8	False	chr11:6599079:CCCAGCTCACTGGACGACTCCCCGTGGCTCTCCGAACGCTGGCCGGAGCCTGGGGTCCTCTGCGCGTCTGGGGGAGGGGCGAGGTACTCAT:C		0.0	0.0		2.9531		0.5001	0.4162		
+	443_D21_new	Olfr384	p.Pro90Thr	missense_variant	QNIQSQDT	8	False	chr11:73602849:C:A		0.0	0.0		0.0		0.5001	0.0959		
+	443_D21_new	Olfr384	p.Ser91Thr	missense_variant	NIQSQDPT	8	False	chr11:73602852:T:A		0.0	0.0		0.0		0.5001	0.0959		
+	443_D21_new	Muc4	p.Gly1868Val	missense_variant	SSTEITSV	8	False	chr16:32755730:G:T		0.0	0.0		0.4192		0.5001	0.2561		
+	443_D21_new	Tbl3	p.Glu247Lys	missense_variant	EASVLLPK	8	False	chr17:24704698:C:T		0.0	0.0		4.4158		0.5001	0.566		
+	443_D21_new	Plin4	p.Met1066Leu	missense_variant	TTGLTGAL	8	False	chr17:56104428:T:A		0.0	0.0		8.0573		0.5001	0.9461		
+	443_D21_new	Fbxo38	p.Ser708Cys	missense_variant	DVYPSCSC	8	False	chr18:62515347:T:A		0.0	0.0		6.6952		0.5001	0.8822		
+	443_D21_new	Olfr1471	p.Lys126Asn	missense_variant	DRHAAVCN	8	False	chr19:13445391:A:T		0.0	0.0		0.0		0.5001	0.0959		
+	443_D21_new	Adra2a	p.Arg319Trp	missense_variant	SSSEHAEW	8	False	chr19:54047169:C:T		0.0	0.0		1.9298		0.5001	0.3641		
+	443_D21_new	Lce1j	p.Cys58_Gly69del	disruptive_inframe_deletion	CCGSSSG_	8	False	chr3:92789263:ACCAGAGCTGCAGCAGCCCCCAGAGCTGCAGCAGCAC:A		0.0	0.0		0.0		0.5001	0.0959		
+	443_D21_new	Kcnc4	p.Gly88Ser	missense_variant	AGSSGSSS	8	False	chr3:107458629:C:T		0.0	0.0		0.2925		0.5001	0.23		
+	443_D21_new	Gm13212	p.Ser107Gly	missense_variant	TPYKTYHG	8	False	chr4:145622313:A:G		0.0	0.0		3.2373		0.5001	0.4243		
+	443_D21_new	Zfp984	p.Asn460_Glu487del	disruptive_inframe_deletion	QRIHTGE_	8	False	chr4:147754929:TTTCTCTCCTGTATGAATTCTCTGATGAATATTAAGATTGGATTTTTGGGTAAAGCATTTGTCACATTCACTGCATTTGTAAGGG:T		0.0	0.0		3.9542		0.5001	0.4905		
+	443_D21_new	Agrn	p.Glu39Gly	missense_variant	TCPERALG	8	False	chr4:156197305:T:C		0.0	0.0		6.3364		0.5001	0.8404		
+	443_D21_new	Gm9758	p.Arg13Ile	missense_variant	RLCRLFQI	8	False	chr5:14914792:C:A		0.0	0.0		0.0		0.5001	0.0959		
+	443_D21_new	Tmem176b	p.Ala21Val	missense_variant	ASTHPQSV	8	False	chr6:48838296:G:A		0.0	0.0		7.8732		0.5001	0.9356		
+	443_D21_new	Nap1l5	p.Glu135Asp	missense_variant	DDEEEDDD	8	False	chr6:58906563:C:G		0.0	0.0		7.2844		0.5001	0.9147		
+	443_D21_new	Olfr482	p.Glu5Gln	missense_variant	MAFLQDGN	8	False	chr7:108095556:C:G		0.0	0.0		0.0		0.5001	0.0959		
+	443_D21_new	Adam20	p.Ser570Pro	missense_variant	AYLRCHDP	8	False	chr8:40796562:T:C		0.0	0.0		0.0		0.5001	0.0959		
+	443_D21_new	Nlrc5	p.Arg1669His	missense_variant	LRKFDLSH	8	False	chr8:94521411:G:A		0.0	0.0		4.468		0.5001	0.5815		
+	443_D21_new	Exosc6	p.Ala161_Ala171del	disruptive_inframe_deletion	DGGCALA_	8	False	chr8:111056844:GCTGGCCGCGGCGCTCACCGCGGCCGCGCTCGCC:G		0.0	0.0		0.0		0.5001	0.0959		
+	443_D21_new	Kdm6a	p.Ala11Thr	missense_variant	CGVSLATT	8	False	chrX:18163036:G:A		0.0	0.0		7.3081		0.5001	0.9182		
+	443_D21_new	8030474K03Rik	p.Leu298Ser	missense_variant	SGEQESSS	8	False	chrX:101795646:TG:CA		0.0	0.0		0.2925		0.5001	0.23		
+	428_D20_new	Dnah7a	p.Glu2853Gly	missense_variant	AKLQDTLG	8	False	chr1:53494615:T:C		0.0	0.0		4.6706		0.5001	0.5989		
+	428_D20_new	Disp1	p.Leu360Pro	missense_variant	LGNYIAIP	8	False	chr1:183089776:A:G		0.0	0.0		5.1263		0.5001	0.6523		
+	428_D20_new	Taar7b	p.Leu207Ile	missense_variant	TCVGGCQI	8	False	chr10:24000557:C:A		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	Taar8a	p.Phe197Trp	missense_variant	QIVINQDW	8	False	chr10:24077089:TT:GG		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	Krtap4-9	p.Val107Leu	missense_variant	RPQCCQSL	8	False	chr11:99785573:G:C		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	Krtap4-9	p.Gly134Asp	missense_variant	SCCRPCCD	8	False	chr11:99785655:G:A		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	Krtap4-9	p.Thr147_Pro196del	disruptive_inframe_deletion	GSSCCRP_	8	False	chr11:99785662:CAGCTGCTGTGGATCTAGCTGCTGCCGCCCCACCTGTTGCATTTCCAGCTGCTGCCGCCCCAGCTGCTGCAGGCCCAGCTGCTGTGTGTCCAGCTGCTGCAGACCCCAGTGCTGCATCTCCAGCTGCTGCCGCCCCTGCTGTGGTAGTTCT:C		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	Rtl1	p.Pro127_Leu148del	disruptive_inframe_deletion	HQEMQEL_	8	False	chr12:109594960:TAGCTCTTGCATTTCCTGGTGGGGGCCACTGGATGGCTCCTCCACTTCTTGGAGTAGATCAGTGGGC:T		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	Zfp957	p.Ser267Pro	missense_variant	RPRKNVAP	8	False	chr14:79213559:A:G		0.0	0.0		0.9129		0.5001	0.3049		
+	428_D20_new	Ppl	p.Ala677Thr	missense_variant	VEQNLQVT	8	False	chr16:5096753:C:T		0.0	0.0		6.7843		0.5001	0.8892		
+	428_D20_new	Adcy5	p.Val924Met	missense_variant	LSLLACSM	8	False	chr16:35291544:G:A		0.0	0.0		5.392		0.5001	0.6802		
+	428_D20_new	Tulp1	p.Glu128Asp	missense_variant	DDDNDDDD	8	False	chr17:28363789:C:A		0.0	0.0		1.0943		0.5001	0.3153		
+	428_D20_new	Plin4	p.Met1066Leu	missense_variant	TTGLTGAL	8	False	chr17:56104428:T:A		0.0	0.0		7.4328		0.5001	0.9252		
+	428_D20_new	Ahnak	p.Asn2650Lys	missense_variant	EVDVSLPK	8	False	chr19:9009303:T:G		0.0	0.0		10.3794		0.5001	0.9948		
+	428_D20_new	Vmn2r2	p.Val657Ile	missense_variant	CVVGEIGI	8	False	chr3:64116938:C:T		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	Tchh	p.Leu1122Arg	missense_variant	EQLRRQER	8	False	chr3:93446619:T:G		0.0	0.0		2.0097		0.5001	0.3676		
+	428_D20_new	Gm13212	p.Ser107Gly	missense_variant	TPYKTYHG	8	False	chr4:145622313:A:G		0.0	0.0		3.9779		0.5001	0.5045		
+	428_D20_new	Gimap5	p.Thr176Val	missense_variant	NRSLRSLV	8	False	chr6:48753023:AC:GT		0.0	0.0		2.7389		0.5001	0.3989		
+	428_D20_new	Tmem176b	p.Ala21Val	missense_variant	ASTHPQSV	8	False	chr6:48838296:G:A		0.0	0.0		8.3825		0.5001	0.953		
+	428_D20_new	Vmn1r18	p.Phe8Leu	missense_variant	MSSLENVL	8	False	chr6:57390546:AA:GG		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	Nap1l5	p.Glu135Asp	missense_variant	DDEEEDDD	8	False	chr6:58906563:C:G		0.0	0.0		5.3702		0.5001	0.6767		
+	428_D20_new	Aak1	p.Gln494His	missense_variant	QPAGTFYH	8	False	chr6:86956530:G:C		0.0	0.0		7.6941		0.5001	0.9321		
+	428_D20_new	Vmn2r24	p.Val706Ala	missense_variant	MVMRLSNA	8	False	chr6:123815832:TT:CC		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	Zfp579	p.Gly23_Arg32del	disruptive_inframe_deletion	RDRGRGR_	8	False	chr7:4994815:ACGGCCTCGGCCACGGCCACGGCCACGGCCT:A		0.0	0.0		4.1415		0.5001	0.5184		
+	428_D20_new	Acp7	p.Ala332Val	missense_variant	GVDLEFWV	8	False	chr7:28614439:G:A		0.0	0.0		0.5893		0.5001	0.2718		
+	428_D20_new	Olfr1532-ps1	p.Lys302Arg	missense_variant	KDVKGALR	8	False	chr7:106915104:A:G		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	4930467E23Rik	p.Gly299Arg	missense_variant	SCEARPPR	8	False	chr8:19749431:CG:AA		0.0	0.0		0.3245		0.5001	0.2422		
+	428_D20_new	Adam25	p.Trp44Arg	missense_variant	ILNILSSR	8	False	chr8:40753828:T:C		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	Adam20	p.Ser570Pro	missense_variant	AYLRCHDP	8	False	chr8:40796562:T:C		0.0	0.0		0.0		0.5001	0.0959		
+	428_D20_new	Zfp612	p.Ser143Gly	missense_variant	SAGSERGG	8	False	chr8:110088589:A:G		0.0	0.0		4.4217		0.5001	0.5695		
+	428_D20_new	Hydin	p.Lys1010Arg	missense_variant	SKKEPGKR	8	False	chr8:110450342:A:G		0.0	0.0		6.8955		0.5001	0.8927		
+	428_D20_new	Dlat	p.Ala204Thr	missense_variant	APAAAPAT	8	False	chr9:50657892:C:T		0.0	0.0		5.8519		0.5001	0.7464		
+	34_D52_old	Kdm6b	p.Ser399Thr	missense_variant	PPGLPGTT	8	False	chr11:69406329:C:G		0.0	0.0		5.9417		0.5001	0.7777		
+	34_D52_old	Adcy5	p.Val924Met	missense_variant	LSLLACSM	8	False	chr16:35291544:G:A		0.0	0.0		4.2271		0.5001	0.5358		
+	34_D52_old	Anks1	p.Gly34Phe	missense_variant	RLSSGFGF	8	False	chr17:27909561:GG:TT		0.0	0.0		5.846		0.5001	0.7429		
+	34_D52_old	Mastl	p.Ala717Val	missense_variant	KSVRRGAV	8	False	chr2:23131754:G:A		0.0	0.0		4.5702		0.5001	0.5919		
+	34_D52_old	Usp38	p.Ser843Gly	missense_variant	KLVPYLLG	8	False	chr8:80984878:T:C		0.0	0.0		6.255		0.5001	0.7986		
+	34_D52_old	Snx33	p.Lys342Asn	missense_variant	CLDDKQWN	8	False	chr9:56925758:C:A		0.0	0.0		5.1743		0.5001	0.6558		
+	36_D99_new	Vwa3b	p.Glu449Val	missense_variant	EKYKWYRV	8	False	chr1:37109114:A:T		0.0	0.0		0.7007		0.5001	0.277		
+	36_D99_new	Hecw2	p.Asn27Thr	missense_variant	RYTLSPET	8	False	chr1:54040413:T:G		0.0	0.0		4.9104		0.5001	0.614		
+	36_D99_new	Adam23	p.Ala64Thr	missense_variant	RPRARGAT	8	False	chr1:63446400:G:A		0.0	0.0		4.4142		0.5001	0.5625		
+	36_D99_new	Ptprn	p.Phe874Val	missense_variant	RTLTQFHV	8	False	chr1:75251812:A:C		0.0	0.0		4.289		0.5001	0.5445		
+	36_D99_new	Nr5a2	p.Gln511His	missense_variant	TVCNYPQH	8	False	chr1:136845613:C:G		0.0	0.0		2.2164		0.5001	0.3745		
+	36_D99_new	Dcaf6	p.His93Tyr	missense_variant	LTTIRSGY	8	False	chr1:165423017:G:A		0.0	0.0		5.6372		0.5001	0.708		
+	36_D99_new	Sf3a2	p.His372_Val385del	disruptive_inframe_deletion	HPPAPGV_	8	False	chr10:80804437:ACTCCAGGGGTGCACCCACCAGCTCCAGGGGTGCACCCACCAG:A		0.0	0.0		4.4071		0.5001	0.559		
+	36_D99_new	Eml6	p.Lys805Arg	missense_variant	VVFWDWKR	8	False	chr11:29809338:T:C		0.0	0.0		5.1871		0.5001	0.6593		
+	36_D99_new	Krtap4-7	p.Ala83Val	missense_variant	RPQCCQSV	8	False	chr11:99643788:G:A		0.0	0.0		0.0		0.5001	0.0959		
+	36_D99_new	Pde4d	p.Pro299Arg	missense_variant	EKEKKKRR	8	False	chr13:109935369:C:G		0.0	0.0		5.0666		0.5001	0.6419		
+	36_D99_new	Vmn1r234	p.Lys145Thr	missense_variant	AIWTILKT	8	False	chr17:21229259:A:C		0.0	0.0		0.0		0.5001	0.0959		
+	36_D99_new	Pja2	p.Glu133Lys	missense_variant	EEVRETLK	8	False	chr17:64309502:C:T		0.0	0.0		7.2528		0.5001	0.9112		
+	36_D99_new	Ppargc1b	p.Glu266Val	missense_variant	LSKEEEEV	8	False	chr18:61311342:T:A		0.0	0.0		2.8376		0.5001	0.4059		
+	36_D99_new	Tgm5	p.Leu421Arg	missense_variant	YGGKEQKR	8	False	chr2:121052513:A:C		0.0	0.0		1.1018		0.5001	0.3205		
+	36_D99_new	Hrnr	p.Cys2830Tyr	missense_variant	QASGSGRY	8	False	chr3:93331476:G:A		0.0	0.0		0.0		0.5001	0.0959		
+	36_D99_new	Chd1l	p.Ala551Thr	missense_variant	WTPDALPT	8	False	chr3:97581048:C:T		0.0	0.0		5.2516		0.5001	0.6628		
+	36_D99_new	Gm13212	p.Ser107Gly	missense_variant	TPYKTYHG	8	False	chr4:145622313:A:G		0.0	0.0		5.0711		0.5001	0.6453		
+	36_D99_new	Megf6	p.Pro1181Leu	missense_variant	AQRCHCPL	8	False	chr4:154267487:C:T		0.0	0.0		4.4627		0.5001	0.5764		
+	36_D99_new	Klk13	p.Arg264Gly	missense_variant	RWIREIIG	8	False	chr7:43726692:A:G		0.0	0.0		0.0		0.5001	0.0959		
+	36_D99_new	Capn5	p.Glu465Lys	missense_variant	FLRTELPK	8	False	chr7:98126340:C:T		0.0	0.0		3.7554		0.5001	0.4793		
+	36_D99_new	Oat	p.Arg255Trp	missense_variant	GVRELCTW	8	False	chr7:132562595:T:A		0.0	0.0		7.951		0.5001	0.9391		
+	36_D99_new	Kat6a	p.Glu805Lys	missense_variant	KEEPQGQK	8	False	chr8:22930352:G:A		0.0	0.0		7.3972		0.5001	0.9217		
+	36_D99_new	Adam20	p.Ser570Pro	missense_variant	AYLRCHDP	8	False	chr8:40796562:T:C		0.0	0.0		0.0		0.5001	0.0959		
+	36_D99_new	Exosc6	p.Ala161_Ala171del	disruptive_inframe_deletion	DGGCALA_	8	False	chr8:111056844:GCTGGCCGCGGCGCTCACCGCGGCCGCGCTCGCC:G		0.0	0.0		0.0		0.5001	0.0959		
+	36_D99_new	Ccdc7b	p.Asp170Asn	missense_variant	IPPELIKN	8	False	chr8:129110866:G:A		0.0	0.0		0.143		0.5001	0.2073		
+	36_D99_new	Uaca	p.Lys1257Thr	missense_variant	KLASLNRT	8	False	chr9:60872102:A:C		0.0	0.0		6.4715		0.5001	0.8561		
+	36_D99_new	Usp9x	p.Ser475Arg	missense_variant	LFDCFKAR	8	False	chrX:13113565:T:G		0.0	0.0		8.8789		0.5001	0.9635		
+	38_D99_new	Aff3	p.Ser795Leu	missense_variant	PGVLSAPL	8	False	chr1:38209641:G:A		0.0	0.0		7.1292		0.5001	0.9043		
+	38_D99_new	Tiprl	p.Gly10Asp	missense_variant	IHGFQSSD	8	False	chr1:165236711:C:T		0.0	0.0		5.3557		0.5001	0.6732		
+	38_D99_new	Ubb	p.Pro38Leu	missense_variant	QDKEGIPL	8	False	chr11:62552258:C:T		0.0	0.0		8.8459		0.5001	0.96		
+	38_D99_new	Kdm6b	p.Ser399Thr	missense_variant	PPGLPGTT	8	False	chr11:69406329:C:G		0.0	0.0		5.8416		0.5001	0.7394		
+	38_D99_new	Ccdc103	p.Asn4Ser	missense_variant	MEKSDVIN	8	False	chr11:102882564:A:G		0.0	0.0		0.0		0.5001	0.0959		
+	38_D99_new	Hfe	p.Leu12Pro	missense_variant	AIFLVGIP	8	False	chr13:23710680:A:G		0.0	0.0		4.7767		0.5001	0.6059		
+	38_D99_new	Adcy5	p.Val924Met	missense_variant	LSLLACSM	8	False	chr16:35291544:G:A		0.0	0.0		3.9769		0.5001	0.501		
+	38_D99_new	Notch3	p.Gln1257His	missense_variant	PCESQPCH	8	False	chr17:32144237:C:A		0.0	0.0		5.6557		0.5001	0.7289		
+	38_D99_new	Ptprm	p.Val225Ile	missense_variant	LWLQGIDI	8	False	chr17:67046149:C:T		0.0	0.0		5.7851		0.5001	0.7324		
+	38_D99_new	Birc6	p.Ala1674_Ala1683del	disruptive_inframe_deletion	TTAAAAA_	8	False	chr17:74609097:GGCAGCAGCAGCAGCTGCATCAGCAGCGGCA:G		0.0	0.0		9.8438		0.5001	0.9914		
+	38_D99_new	Lrp5	p.Pro15Leu	missense_variant	APPPPPPL	8	False	chr19:3686399:G:A		0.0	0.0		5.4747		0.5001	0.6941		
+	38_D99_new	Xpnpep1	p.Phe552Val	missense_variant	CGISYKTV	8	False	chr19:52996942:A:C		0.0	0.0		5.8249		0.5001	0.7359		
+	38_D99_new	Mastl	p.Ala717Val	missense_variant	KSVRRGAV	8	False	chr2:23131754:G:A		0.0	0.0		3.0467		0.5001	0.4208		
+	38_D99_new	Ryr3	p.Glu3592Asp	missense_variant	SCQSGEDD	8	False	chr2:112669264:T:A		0.0	0.0		2.3425		0.5001	0.3815		
+	38_D99_new	Frmd5	p.Arg22Trp	missense_variant	GGLKESHW	8	False	chr2:121806768:G:A		0.0	0.0		2.1768		0.5001	0.371		
+	38_D99_new	Med12l	p.Thr157Met	missense_variant	SVPMVRAM	8	False	chr3:59042327:C:T		0.0	0.0		3.5453		0.5001	0.4584		
+	38_D99_new	Lce1j	p.Cys58_Gly69del	disruptive_inframe_deletion	CCGSSSG_	8	False	chr3:92789263:ACCAGAGCTGCAGCAGCCCCCAGAGCTGCAGCAGCAC:A		0.0	0.0		0.0		0.5001	0.0959		
+	38_D99_new	Macf1	p.Ser831Pro	missense_variant	LEDLLQDP	8	False	chr4:123502169:A:G		0.0	0.0		11.7728		0.5001	0.9983		
+	38_D99_new	Gm13212	p.Ser107Gly	missense_variant	TPYKTYHG	8	False	chr4:145622313:A:G		0.0	0.0		4.8988		0.5001	0.6105		
+	38_D99_new	Prh1	p.Pro249_Pro262del	disruptive_inframe_deletion	RPPQGPP_	8	False	chr6:132572261:CCTCAAGGCCCACCACCACCCGGAGGCCCACAGCCGAGTCCCA:C		0.0	0.0		0.0		0.5001	0.0959		
+	38_D99_new	Zfp28	p.Pro31Arg	missense_variant	KARPGGGR	8	False	chr7:6383485:C:G		0.0	0.0		3.3874		0.5001	0.4487		
+	38_D99_new	Adam20	p.Ser570Pro	missense_variant	AYLRCHDP	8	False	chr8:40796562:T:C		0.0	0.0		0.0		0.5001	0.0959		
+	38_D99_new	Nlrc5	p.Arg1669His	missense_variant	LRKFDLSH	8	False	chr8:94521411:G:A		0.0	0.0		8.9156		0.5001	0.9739		
+	42_D122_old	C2cd6	p.Tyr2096His	missense_variant	SESQSFKH	8	False	chr1:59003365:A:G		0.0	0.0		0.0		0.5001	0.0959		
+	42_D122_old	Spata46	p.Pro23Leu	missense_variant	SSALSAFL	8	False	chr1:170308949:C:T		0.0	0.0		0.0413		0.5001	0.1951		
+	42_D122_old	Lpo	p.Gly326Asp	missense_variant	RNLSSPLD	8	False	chr11:87815019:C:T		0.0	0.0		2.7113		0.5001	0.3954		
+	42_D122_old	1700012B07Rik	p.Thr84Met	missense_variant	KTELQKDM	8	False	chr11:109813564:G:A		0.0	0.0		0.0413		0.5001	0.1951		
+	42_D122_old	Eif3l	p.Leu34Phe	missense_variant	TGDPKQDF	8	False	chr15:79076848:C:T		0.0	0.0		7.5464		0.5001	0.9287		
+	42_D122_old	Tulp1	p.Phe480Val	missense_variant	SGSYTLNV	8	False	chr17:28353743:A:C		0.0	0.0		0.2671		0.5001	0.2213		
+	42_D122_old	Cpt1a	p.Arg145Cys	missense_variant	AEHGKMSC	8	False	chr19:3356468:C:T		0.0	0.0		6.3249		0.5001	0.8056		
+	42_D122_old	Tcirg1	p.Arg56Gln	missense_variant	RRFVVDVQ	8	False	chr19:3904246:C:T		0.0	0.0		6.6203		0.5001	0.8735		
+	42_D122_old	Ndufs8	p.Asn56Ser	missense_variant	DMKSATDS	8	False	chr19:3911199:T:C		0.0	0.0		5.0565		0.5001	0.6384		
+	42_D122_old	Aldh3b3	p.Gly325Arg	missense_variant	IGGQSDER	8	False	chr19:3966004:G:A		0.0	0.0		1.4405		0.5001	0.3432		
+	42_D122_old	Nudt8	p.Leu133Pro	missense_variant	LQSLRPNP	8	False	chr19:4001698:T:C		0.0	0.0				0.5001			
+	42_D122_old	Ssh3	p.Arg112His	missense_variant	LRPQDDIH	8	False	chr19:4267751:C:T		0.0	0.0		4.652		0.5001	0.5954		
+	42_D122_old	Ccs	p.Gln187Arg	missense_variant	TFRIEDKR	8	False	chr19:4825951:T:C		0.0	0.0		3.2846		0.5001	0.4383		
+	42_D122_old	Zdhhc24	p.Gly128Asp	missense_variant	DHHCRLLD	8	False	chr19:4880222:G:A		0.0	0.0		3.7572		0.5001	0.4828		
+	42_D122_old	Dpp3	p.Asn728Asp	missense_variant	ADARFWRD	8	False	chr19:4907657:T:C		0.0	0.0		5.64		0.5001	0.715		
+	42_D122_old	Dpp3	p.Leu361Pro	missense_variant	LKELPWPP	8	False	chr19:4916993:A:G		0.0	0.0		5.64		0.5001	0.715		
+	42_D122_old	Sart1	p.Ala70Thr	missense_variant	RGSGRRGT	8	False	chr19:5388420:C:T		0.0	0.0		5.4168		0.5001	0.6837		
+	42_D122_old	Mus81	p.Ala513Thr	missense_variant	AYDACATT	8	False	chr19:5483160:C:T		0.0	0.0		4.007		0.5001	0.5114		
+	42_D122_old	1700020D05Rik	p.Glu237Asp	missense_variant	HTDPVDCD	8	False	chr19:5503041:C:A		0.0	0.0		1.8422		0.5001	0.3536		
+	42_D122_old	Rnaseh2c	p.Asp9Glu	missense_variant	KNPEEAAE	8	False	chr19:5601935:C:A		0.0	0.0		2.8745		0.5001	0.4093		
+	42_D122_old	Sipa1	p.Ala739Thr	missense_variant	LPKLGPET	8	False	chr19:5654078:C:T		0.0	0.0		5.8731		0.5001	0.7568		
+	42_D122_old	Sipa1	p.Glu599Asp	missense_variant	GAETSGPD	8	False	chr19:5654769:C:G		0.0	0.0		5.8731		0.5001	0.7568		
+	42_D122_old	Sipa1	p.Ile137Thr	missense_variant	PRGTGSHT	8	False	chr19:5660571:A:G		0.0	0.0		5.8731		0.5001	0.7568		
+	42_D122_old	Kcnk7	p.Ser84Gly	missense_variant	GVSSLGNG	8	False	chr19:5704725:A:G		0.0	0.0		0.3015		0.5001	0.2352		
+	42_D122_old	Ehbp1l1	p.Thr1546Ala	missense_variant	SPSLGEEA	8	False	chr19:5710801:T:C		0.0	0.0		6.327		0.5001	0.823		
+	42_D122_old	Ehbp1l1	p.Ser1438_Val1440del	disruptive_inframe_deletion	VGASGGV_	8	False	chr19:5715991:TCTCACACCA:T		0.0	0.0		6.327		0.5001	0.823		
+	42_D122_old	Ehbp1l1	p.Thr1021Met	missense_variant	EMLETQKM	8	False	chr19:5718212:G:A		0.0	0.0		6.327		0.5001	0.823		
+	42_D122_old	Ehbp1l1	p.Ser865Ala	missense_variant	RVLEAEAA	8	False	chr19:5718680:CT:GC		0.0	0.0		6.327		0.5001	0.823		
+	42_D122_old	Ehbp1l1	p.Ser794Thr	missense_variant	ILGTREIT	8	False	chr19:5718894:A:T		0.0	0.0		6.327		0.5001	0.823		
+	42_D122_old	Ehbp1l1	p.Pro439Leu	missense_variant	EGPEAAGL	8	False	chr19:5719958:G:A		0.0	0.0		6.327		0.5001	0.823		
+	42_D122_old	Ehbp1l1	p.His422Gln	missense_variant	LHQVDAEQ	8	False	chr19:5720008:G:C		0.0	0.0		6.327		0.5001	0.823		
+	42_D122_old	Ltbp3	p.Gln263Pro	missense_variant	LLPHPKPP	8	False	chr19:5746053:A:C		0.0	0.0		6.4879		0.5001	0.863		
+	42_D122_old	Ltbp3	p.Thr662Ala	missense_variant	CVDLNECA	8	False	chr19:5751413:A:G		0.0	0.0		6.4879		0.5001	0.863		
+	42_D122_old	Scyl1	p.Ile677Val	missense_variant	QGSRAGQV	8	False	chr19:5759146:T:C		0.0	0.0		6.0088		0.5001	0.7882		
+	42_D122_old	Frmd8	p.Asn110Asp	missense_variant	ELLLRFTD	8	False	chr19:5870038:T:C		0.0	0.0		5.3495		0.5001	0.6697		
+	42_D122_old	Gpha2	p.Phe125Leu	missense_variant	CQCDMCRL	8	False	chr19:6227588:T:C		0.0	0.0		0.0		0.5001	0.0959		
+	42_D122_old	Atg2a	p.Asn722Asp	missense_variant	LRVSKALD	8	False	chr19:6250472:A:G		0.0	0.0		5.9098		0.5001	0.7673		
+	42_D122_old	Atg2a	p.Gln1276Arg	missense_variant	DTERRGLR	8	False	chr19:6255518:A:G		0.0	0.0		5.9098		0.5001	0.7673		
+	42_D122_old	Ccdc88b	p.Arg87His	missense_variant	GLRMVRGH	8	False	chr19:6857454:C:T		0.0	0.0		5.0901		0.5001	0.6488		
+	42_D122_old	Gpr137	p.Thr48Pro	missense_variant	RHFGSSFP	8	False	chr19:6942016:T:G		0.0	0.0		3.4888		0.5001	0.4553		
+	42_D122_old	Nudt22	p.Leu175Glu	missense_variant	RHKDLPGE	8	False	chr19:6994723:AA:TC		0.0	0.0		2.8915		0.5001	0.4127		
+	42_D122_old	Flrt1	p.Arg344Lys	missense_variant	MWLRDWVK	8	False	chr19:7096150:C:T		0.0	0.0		0.5507		0.5001	0.2665		
+	42_D122_old	Cox8a	p.Val49Leu	missense_variant	IGLTSCFL	8	False	chr19:7215454:C:G		0.0	0.0		6.2399		0.5001	0.7951		
+	42_D122_old	Lgals12	p.Glu273Lys	missense_variant	EVLLLCQK	8	False	chr19:7598153:C:T		0.0	0.0		2.3162		0.5001	0.378		
+	42_D122_old	Plaat5	p.Ser30Ala	missense_variant	PTQISKTA	8	False	chr19:7612770:T:G		0.0	0.0		1.8769		0.5001	0.3589		
+	42_D122_old	Slc22a28	p.Met305Lys	missense_variant	ELRKVAHK	8	False	chr19:8101410:A:T		0.0	0.0		0.0		0.5001	0.0959		
+	42_D122_old	Slc22a29	p.Arg541Lys	missense_variant	KESRKGKK	8	False	chr19:8160588:C:T		0.0	0.0		0.0		0.5001	0.0959		
+	42_D122_old	Chrm1	p.Ala265Thr	missense_variant	RCCRCCRT	8	False	chr19:8678725:G:A		0.0	0.0		0.8587		0.5001	0.3014		
+	42_D122_old	Zbtb3	p.Arg321Gly	missense_variant	LSEEQPHG	8	False	chr19:8803985:A:G		0.0	0.0		1.1317		0.5001	0.3258		
+	42_D122_old	Myrf	p.Lys834Asn	missense_variant	PSLLLVTN	8	False	chr19:10214920:C:A		0.0	0.0		5.8695		0.5001	0.7498		
+	42_D122_old	Syt7	p.Gln161Arg	missense_variant	QPLSQNQR	8	False	chr19:10426433:A:G		0.0	0.0		0.7877		0.5001	0.2874		
+	42_D122_old	Ppp1r32	p.Ser286Pro	missense_variant	VPTPAPQP	8	False	chr19:10477297:A:G		0.0	0.0		1.1507		0.5001	0.3327		
+	42_D122_old	Vps37c	p.Asp161Asn	missense_variant	PTPSTPGN	8	False	chr19:10712727:G:A		0.0	0.0		4.8841		0.5001	0.6082		
+	42_D122_old	Zp1	p.Thr246Ala	missense_variant	VNGSSKEA	8	False	chr19:10918535:T:C		0.0	0.0		0.0		0.5001	0.0959		
+	42_D122_old	Tmem176b	p.Ala21Val	missense_variant	ASTHPQSV	8	False	chr6:48838296:G:A		0.0	0.0		8.8868		0.5001	0.967		
+	42_D122_old	Gm21119	p.Phe285Ile	missense_variant	FNEEVLYI	8	False	chr8:20634946:T:A		0.0	0.0		0.368		0.5001	0.2491		
+	443_D21_new	Kcnq2	p.Leu40fs	frameshift_variant	DSTRDGAT	8	True	chr2:181134974:AGC:A		0.0	0.0		0.0		0.5001	0.0959		
+	34_D52_old	Gpr88	p.Ala198fs	frameshift_variant	HYPALLAR	8	True	chr3:116252062:GCTCCCGC:G		0.0	0.0		4.2795		0.5001	0.5393		
+	36_D99_new	Ttc14	p.Ter767fs	frameshift_variant	KGNKPKKM	8	True	chr3:33809579:C:CA		0.0	0.0		6.9526		0.5001	0.895		

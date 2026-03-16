@@ -19,13 +19,15 @@ logging.basicConfig(level=logging.INFO,
 log = logging.getLogger(__name__)
 
 # ── Config ────────────────────────────────────────────────────────────────────
-BASE_DIR   = "/home/ec2-user"
-ANN_DIR    = f"{BASE_DIR}/results/annotated"
-OUT_DIR    = f"{BASE_DIR}/results/peptides"
-S3_ANN     = "s3://bam-wes/NeoAntigen-aws/results/annotated"
-S3_OUT     = "s3://bam-wes/NeoAntigen-aws/results/peptides"
+BASE_DIR     = "/home/ec2-user"
+RESULTS_DIR  = os.environ.get("RESULTS_DIR",  f"{BASE_DIR}/results/res_20260311_225555")
+S3_RESULTS   = os.environ.get("S3_RESULTS",   "s3://neoantigen2026-rerun/results/res_20260311_225555")
+ANN_DIR      = f"{RESULTS_DIR}/annotated"
+OUT_DIR      = f"{RESULTS_DIR}/peptides"
+S3_ANN       = f"{S3_RESULTS}/annotated"
+S3_OUT       = f"{S3_RESULTS}/peptides"
 
-TUMOR_SAMPLES = ["428_D20_new","34_D52_old","36_D99_new","38_D99_new","42_D122_old"]
+TUMOR_SAMPLES = ["443_D21_new","428_D20_new","34_D52_old","36_D99_new","38_D99_new","42_D122_old"]
 PEPTIDE_LENS  = [8, 9, 10]
 
 TARGET_EFFECTS = {
@@ -97,8 +99,104 @@ def frameshift_junction_peptides(wt_seq: str, fs_pos: int,
     return peptides
 
 
+_PROTEIN_DB = None  # gene_symbol → list of protein sequences
+
+def _load_protein_db():
+    """Load Ensembl protein FASTA into gene_symbol → [protein_seq] mapping."""
+    global _PROTEIN_DB
+    if _PROTEIN_DB is not None:
+        return _PROTEIN_DB
+    fasta_path = os.path.expanduser(
+        "~/.cache/pyensembl/GRCm38/ensembl102/Mus_musculus.GRCm38.pep.all.fa.gz")
+    if not os.path.exists(fasta_path):
+        log.warning("Ensembl protein FASTA not found — peptide context will be approximate")
+        _PROTEIN_DB = {}
+        return _PROTEIN_DB
+    db = {}
+    import gzip as gz
+    sym_re = re.compile(r"gene_symbol:(\S+)")
+    cur_sym = None; cur_seq = []
+    with gz.open(fasta_path, "rt") as fh:
+        for line in fh:
+            line = line.rstrip()
+            if line.startswith(">"):
+                if cur_sym and cur_seq:
+                    db.setdefault(cur_sym, []).append("".join(cur_seq))
+                m = sym_re.search(line)
+                cur_sym = m.group(1) if m else None
+                cur_seq = []
+            else:
+                cur_seq.append(line)
+    if cur_sym and cur_seq:
+        db.setdefault(cur_sym, []).append("".join(cur_seq))
+    _PROTEIN_DB = db
+    log.info(f"Loaded protein DB: {len(db)} gene symbols")
+    return _PROTEIN_DB
+
+
+def _extract_peptides_from_mutation(gene, hgvsp, effects, transcript,
+                                    chrom, pos, ref, allele, sample):
+    """Extract mutant peptides using Ensembl protein FASTA lookup."""
+    db = _load_protein_db()
+    wt_aa, aa_pos, mut_aa = parse_aa_change(hgvsp)
+    if wt_aa is None or aa_pos is None:
+        return []
+
+    mut_id  = f"{chrom}:{pos}:{ref}:{allele.split(',')[0]}"
+    active  = effects & TARGET_EFFECTS
+    is_fs   = bool(effects & FRAMESHIFT_EFFECTS)
+    records = []
+
+    # Look up protein sequences for this gene
+    proteins = db.get(gene, [])
+
+    if not is_fs and mut_aa and "*" not in mut_aa:
+        # Find a protein where position aa_pos has the wildtype AA
+        protein = None
+        for p in proteins:
+            if aa_pos <= len(p) and p[aa_pos - 1] == wt_aa:
+                protein = p
+                break
+        if protein is None and proteins:
+            protein = max(proteins, key=len)  # longest as fallback
+
+        if protein and aa_pos <= len(protein):
+            mut_prot = protein[:aa_pos - 1] + mut_aa + protein[aa_pos:]
+            # Extract k-mers that span the mutated position
+            for k in PEPTIDE_LENS:
+                start = max(0, aa_pos - k)
+                end   = min(aa_pos, len(mut_prot) - k + 1)
+                for i in range(start, end):
+                    pep = mut_prot[i:i + k]
+                    if len(pep) == k and "*" not in pep and "X" not in pep:
+                        records.append({
+                            "sample": sample, "mut_id": mut_id,
+                            "gene": gene, "transcript": transcript,
+                            "effect": "|".join(active), "hgvsp": hgvsp,
+                            "peptide": pep, "length": k, "is_frameshift": False
+                        })
+    elif is_fs:
+        protein = None
+        for p in proteins:
+            if aa_pos <= len(p) and p[aa_pos - 1] == wt_aa:
+                protein = p; break
+        if protein is None and proteins:
+            protein = max(proteins, key=len)
+        if protein and aa_pos <= len(protein):
+            novel_suffix = "AAAAAAAAAAAAAAAA"  # 16-AA novel sequence placeholder
+            for pep in frameshift_junction_peptides(
+                    protein, aa_pos - 1, novel_suffix, PEPTIDE_LENS):
+                records.append({
+                    "sample": sample, "mut_id": mut_id,
+                    "gene": gene, "transcript": transcript,
+                    "effect": "|".join(active), "hgvsp": hgvsp,
+                    "peptide": pep, "length": len(pep), "is_frameshift": True
+                })
+    return records
+
+
 def parse_vcf_for_peptides(vcf_path: str, sample: str) -> pd.DataFrame:
-    """Extract peptide candidates from SnpEff-annotated VCF."""
+    """Extract peptide candidates from SnpEff-annotated VCF using Ensembl protein DB."""
     records = []
     opener  = gzip.open if vcf_path.endswith(".gz") else open
 
@@ -114,11 +212,11 @@ def parse_vcf_for_peptides(vcf_path: str, sample: str) -> pd.DataFrame:
             if filt not in ("PASS", "."):
                 continue
 
-            # Parse SnpEff ANN field
             ann_match = re.search(r"ANN=([^;]+)", info)
             if not ann_match:
                 continue
 
+            seen_muts = set()  # avoid duplicate ANN entries for same variant
             for ann_entry in ann_match.group(1).split(","):
                 fields = ann_entry.split("|")
                 if len(fields) < 11:
@@ -131,50 +229,18 @@ def parse_vcf_for_peptides(vcf_path: str, sample: str) -> pd.DataFrame:
                 hgvsp     = fields[10]
                 transcript= fields[6]
 
-                # Only process target effects with moderate/high impact
                 active = effects & TARGET_EFFECTS
                 if not active or impact not in ("MODERATE","HIGH"):
                     continue
 
-                # Parse amino acid change
-                wt_aa, aa_pos, mut_aa = parse_aa_change(hgvsp)
-                if wt_aa is None:
+                key = (chrom, pos, ref, allele, gene, hgvsp)
+                if key in seen_muts:
                     continue
+                seen_muts.add(key)
 
-                mut_id = f"{chrom}:{pos}:{ref}:{allele.split(',')[0]}"
-                is_fs  = bool(effects & FRAMESHIFT_EFFECTS)
-
-                # Build mutant peptide context
-                # For standard substitutions: replace AA at position
-                if not is_fs and mut_aa and "*" not in mut_aa:
-                    # Approximate: use 15-AA window centred on mutation
-                    window  = "X" * 14 + mut_aa + "X" * 14  # placeholder
-                    peptides = sliding_peptides(mut_aa * 20, PEPTIDE_LENS)  # use available AA
-                    # Simplified: emit single-AA-replaced peptides
-                    for plen in PEPTIDE_LENS:
-                        pep = ("X" * (plen//2) + mut_aa + "X" * (plen - plen//2 - 1))[:plen]
-                        if "X" not in pep:
-                            records.append({
-                                "sample": sample, "mut_id": mut_id,
-                                "gene": gene, "transcript": transcript,
-                                "effect": "|".join(active), "hgvsp": hgvsp,
-                                "peptide": pep, "length": len(pep),
-                                "is_frameshift": is_fs
-                            })
-                    continue
-
-                if is_fs:
-                    # Junction peptides: WT + 10 novel AAs
-                    novel_suffix = "A" * 15  # placeholder; replace with pyensembl lookup
-                    for pep in frameshift_junction_peptides(
-                            "M"*50, aa_pos, novel_suffix, PEPTIDE_LENS):
-                        records.append({
-                            "sample": sample, "mut_id": mut_id,
-                            "gene": gene, "transcript": transcript,
-                            "effect": "|".join(active), "hgvsp": hgvsp,
-                            "peptide": pep, "length": len(pep),
-                            "is_frameshift": True
-                        })
+                recs = _extract_peptides_from_mutation(
+                    gene, hgvsp, effects, transcript, chrom, pos, ref, allele, sample)
+                records.extend(recs)
 
     return pd.DataFrame(records)
 
@@ -186,10 +252,10 @@ def get_full_peptides_pyensembl(vcf_path: str, sample: str) -> pd.DataFrame:
     """
     try:
         from pyensembl import EnsemblRelease
-        data = EnsemblRelease(86, species="mouse")
+        data = EnsemblRelease(102, species="mouse")  # GRCm38/mm10
         data.download(); data.index()
-    except Exception as e:
-        log.warning(f"pyensembl unavailable ({e}), using simplified extraction")
+    except BaseException as e:
+        log.warning(f"pyensembl unavailable ({e}), using protein FASTA extraction")
         return parse_vcf_for_peptides(vcf_path, sample)
 
     records = []

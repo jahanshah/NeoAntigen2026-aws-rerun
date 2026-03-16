@@ -12,20 +12,22 @@ dir.create(local_lib, recursive = TRUE, showWarnings = FALSE)
 .libPaths(c(local_lib, .libPaths()))
 
 for (pkg in c("ggplot2","dplyr","tidyr","readr","patchwork","RColorBrewer",
-              "scales","ggrepel")) {
+              "scales")) {
     if (!requireNamespace(pkg, quietly = TRUE))
         install.packages(pkg, repos="https://cloud.r-project.org",
                          lib=local_lib, quiet=TRUE)
     suppressPackageStartupMessages(library(pkg, character.only=TRUE))
 }
 
-PYCLONE_DIR <- "/home/ec2-user/results/pyclone"
-OUT_DIR     <- "/home/ec2-user/results/pyclone/tables"
-S3_OUT      <- "s3://bam-wes/NeoAntigen-aws/results/pyclone/tables"
+results_dir <- Sys.getenv("RESULTS_DIR", unset="/home/ec2-user/results/res_20260311_225555")
+s3_results  <- Sys.getenv("S3_RESULTS",  unset="s3://neoantigen2026-rerun/results/res_20260311_225555")
+PYCLONE_DIR <- file.path(results_dir, "pyclone")
+OUT_DIR     <- file.path(results_dir, "pyclone/tables")
+S3_OUT      <- paste0(s3_results, "/pyclone/tables")
 dir.create(OUT_DIR, showWarnings=FALSE, recursive=TRUE)
 
-TIMEPOINTS <- c("428_D20_new"=20, "34_D52_old"=52,
-                "36_D99_new"=99,  "38_D99_new"=99, "42_D122_old"=122)
+TIMEPOINTS <- c("443_D21_new"=21, "428_D20_new"=20, "34_D52_old"=52,
+                "36_D99_new"=99,  "38_D99_new"=99,  "42_D122_old"=122)
 
 # ── Load PyClone output ───────────────────────────────────────────────────────
 loci_f    <- file.path(PYCLONE_DIR, "output/tables/loci.tsv")
@@ -33,8 +35,9 @@ cluster_f <- file.path(PYCLONE_DIR, "output/tables/cluster.tsv")
 
 if (!file.exists(loci_f)) {
     # Try S3
-    system(paste("aws s3 cp s3://bam-wes/NeoAntigen-aws/results/pyclone/output/tables/loci.tsv",    loci_f))
-    system(paste("aws s3 cp s3://bam-wes/NeoAntigen-aws/results/pyclone/output/tables/cluster.tsv", cluster_f))
+    s3_pyclone <- paste0(s3_results, "/pyclone/output/tables")
+    system(paste("aws s3 cp", paste0(s3_pyclone, "/loci.tsv"),    loci_f))
+    system(paste("aws s3 cp", paste0(s3_pyclone, "/cluster.tsv"), cluster_f))
 }
 
 if (!file.exists(loci_f)) {

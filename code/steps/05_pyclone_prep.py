@@ -16,13 +16,15 @@ logging.basicConfig(level=logging.INFO,
 log = logging.getLogger(__name__)
 
 # ── Config ────────────────────────────────────────────────────────────────────
-BASE_DIR    = "/home/ec2-user"
-ANN_DIR     = f"{BASE_DIR}/results/annotated"
-OUT_DIR     = f"{BASE_DIR}/results/pyclone/input"
-S3_ANN      = "s3://bam-wes/NeoAntigen-aws/results/annotated"
-S3_OUT      = "s3://bam-wes/NeoAntigen-aws/results/pyclone/input"
+BASE_DIR     = "/home/ec2-user"
+RESULTS_DIR  = os.environ.get("RESULTS_DIR",  f"{BASE_DIR}/results/res_20260311_225555")
+S3_RESULTS   = os.environ.get("S3_RESULTS",   "s3://neoantigen2026-rerun/results/res_20260311_225555")
+ANN_DIR      = f"{RESULTS_DIR}/annotated"
+OUT_DIR      = f"{RESULTS_DIR}/pyclone/input"
+S3_ANN       = f"{S3_RESULTS}/annotated"
+S3_OUT       = f"{S3_RESULTS}/pyclone/input"
 
-TUMOR_SAMPLES = ["428_D20_new","34_D52_old","36_D99_new","38_D99_new","42_D122_old"]
+TUMOR_SAMPLES = ["443_D21_new","428_D20_new","34_D52_old","36_D99_new","38_D99_new","42_D122_old"]
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def parse_vcf(vcf_path: str) -> pd.DataFrame:
@@ -51,8 +53,9 @@ def parse_vcf(vcf_path: str) -> pd.DataFrame:
 
             # Extract FORMAT fields
             fmt_keys  = fmt.split(":")
-            fmt_dict  = dict(zip(fmt_keys, samples[0].split(":")))  # tumour = sample[0]
-            norm_dict = dict(zip(fmt_keys, samples[1].split(":"))) if len(samples) > 1 else {}
+            # In GATK Mutect2 paired output: normal is sample[0], tumour is sample[-1]
+            fmt_dict  = dict(zip(fmt_keys, samples[-1].split(":")))  # tumour = last sample
+            norm_dict = dict(zip(fmt_keys, samples[0].split(":"))) if len(samples) > 1 else {}
 
             # Read counts: prefer AD, fall back to F1R2/F2R1
             if "AD" in fmt_dict:

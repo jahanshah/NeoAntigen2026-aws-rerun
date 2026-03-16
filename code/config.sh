@@ -19,7 +19,7 @@ export REF_DICT="${REF_DIR}/mm10.dict"
 export REF_FAI="${REF_DIR}/mm10.fa.fai"
 export EXON_BED="${REF_DIR}/mm10_exons.bed"
 export KNOWN_SNPS="${REF_DIR}/mgp_snps.vcf.gz"
-export SNPEFF_DB="GRCm38.86"
+export SNPEFF_DB="mm10"
 
 # --- Run ID (timestamped) ----------------------------------------------------
 # Set once by run_pipeline.sh and exported; individual steps inherit it.
@@ -86,7 +86,7 @@ export PEPTIDE_LENGTHS="8,9,10"
 #   r5.2xlarge (8 vCPU,  64GB):  THREADS=6,  JAVA_OPTS="-Xmx24g"
 #   r5.4xlarge (16 vCPU, 128GB): THREADS=12, JAVA_OPTS="-Xmx40g"
 #   Current:   16 vCPU, 30GB EBS root + /scratch EBS volume
-export THREADS=16
+export THREADS=8
 export JAVA_OPTS="-Xmx20g"
 
 # --- Utility functions -------------------------------------------------------

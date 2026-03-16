@@ -24,10 +24,10 @@ export S3_FASTQ="${S3_ROOT}/data/fastq/rnaseq"
 export S3_RNASEQ_OUT="${S3_RESULTS}/rnaseq"
 
 # --- Threading ---------------------------------------------------------------
-export RNASEQ_THREADS=16
+export RNASEQ_THREADS=8
 # Number of STAR alignment jobs to run concurrently (2 × 16-thread = 32 threads
 # in flight; safe on a 16-vCPU machine because STAR I/O-waits frequently).
-export STAR_ALIGN_PARALLEL=2
+export STAR_ALIGN_PARALLEL=4
 
 # --- Local paths -------------------------------------------------------------
 export RNASEQ_RESULTS="${RESULTS_DIR}/rnaseq"

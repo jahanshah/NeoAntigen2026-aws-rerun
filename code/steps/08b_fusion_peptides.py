@@ -8,6 +8,16 @@ Arriba output columns used:
   confidence            — high/medium/low
   reading_frame         — in-frame / out-of-frame / .
   peptide_sequence      — fusion protein AA sequence; | marks junction, ___ is truncation
+                          Arriba convention: UPPERCASE = canonical reading frame,
+                          lowercase = out-of-frame novel translation after junction.
+                          Both are real amino acid sequences — case only marks frame origin.
+                          We convert to uppercase before k-mer extraction so all peptides
+                          are accepted by MHC prediction tools (e.g. IEDB API).
+
+Germline/artifact filter:
+  Fusions present in >= MIN_SAMPLES_FOR_GERMLINE_FILTER samples are treated as
+  germline structural variants or recurrent sequencing artifacts and excluded.
+  (Adgrf1::Adgrf5 appears in 4/6 tumor samples — clear germline SV.)
 
 Outputs:
   results/peptides/fusions_all.tsv     — per-fusion metadata + peptides
@@ -23,34 +33,50 @@ logging.basicConfig(level=logging.INFO,
 log = logging.getLogger(__name__)
 
 # ── Config ─────────────────────────────────────────────────────────────────────
-BASE_DIR  = "/home/ec2-user/results"
-OUT_DIR   = f"{BASE_DIR}/peptides"
-S3_ARRIBA = "s3://bam-wes/NeoAntigen-aws/data/FusionCalling/arriba_files"
-S3_OUT    = "s3://bam-wes/NeoAntigen-aws/results/peptides"
-LOCAL_DIR = f"{BASE_DIR}/../tmp/arriba"
-PEPTIDE_LENS = [8, 9, 10]
+BASE_DIR      = "/home/ec2-user"
+RESULTS_DIR   = os.environ.get("RESULTS_DIR",  f"{BASE_DIR}/results/res_20260311_225555")
+S3_RESULTS    = os.environ.get("S3_RESULTS",   "s3://neoantigen2026-rerun/results/res_20260311_225555")
+RNASEQ_RUN_ID = os.environ.get("RNASEQ_RUN_ID", "res_20260313_071626")
+S3_ROOT       = "s3://neoantigen2026-rerun"
+OUT_DIR       = f"{RESULTS_DIR}/peptides"
+S3_ARRIBA     = f"{S3_ROOT}/results/{RNASEQ_RUN_ID}/rnaseq/fusion"
+S3_OUT        = f"{S3_RESULTS}/peptides"
+LOCAL_DIR     = os.environ.get("TMP_DIR", f"{BASE_DIR}/tmp/neoantig_pipeline") + "/arriba_peptides"
+PEPTIDE_LENS  = [8, 9, 10]
+# Fusions seen in this many or more samples are excluded as germline/artifact
+MIN_SAMPLES_FOR_GERMLINE_FILTER = 3
 os.makedirs(OUT_DIR, exist_ok=True)
 os.makedirs(LOCAL_DIR, exist_ok=True)
 
-# Map Arriba file suffixes → WES/RNASeq sample IDs
+# Sample IDs — Arriba files are named Arriba_<sample_id>.txt
 SAMPLE_MAP = {
-    "D20_new":    "428_D20_new",
-    "D52_old":    "34_D52_old",
-    "D99_new_36": "36_D99_new",
-    "D99_new_38": "38_D99_new",
-    "D122_old":   "42_D122_old",
-    "D88_old":    "D88_old",    # RNASeq-only timepoint
-    "D99_old":    "D99_old",    # RNASeq-only timepoint
-    "D109_new":   "D109_new",   # RNASeq-only timepoint
+    "443_D21_new": "443_D21_new",
+    "428_D20_new": "428_D20_new",
+    "34_D52_old":  "34_D52_old",
+    "36_D99_new":  "36_D99_new",
+    "38_D99_new":  "38_D99_new",
+    "42_D122_old": "42_D122_old",
+    "D88_old":     "D88_old",    # RNASeq-only timepoint
+    "D99_old":     "D99_old",    # RNASeq-only timepoint
+    "D109_new":    "D109_new",   # RNASeq-only timepoint
+    "423_D0_old":  "423_D0_old", # Normal baseline
 }
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 def sliding_peptides(seq: str, lengths: list, window_around_junction: int) -> list:
-    """Return k-mers that span the junction (marked by | position)."""
+    """
+    Return k-mers that span the junction (marked by | position).
+
+    Arriba uses lowercase for out-of-frame translation after the junction.
+    These are real amino acid sequences — we convert to uppercase so peptides
+    are accepted by IEDB and other MHC prediction tools.
+    """
     jpos = seq.find("|")
     if jpos < 0:
         return []
-    clean = seq.replace("|", "").replace("_", "")
+    # Convert to uppercase: out-of-frame (lowercase) amino acids are still real
+    # amino acids translated from the novel reading frame after the junction.
+    clean = seq.upper().replace("|", "").replace("_", "")
     peptides = []
     for k in lengths:
         # Only report k-mers that overlap the junction
@@ -132,6 +158,22 @@ def main():
         return
 
     df = pd.DataFrame(all_records).drop_duplicates(subset=["sample", "peptide"])
+
+    # ── Germline/artifact filter ───────────────────────────────────────────────
+    # A fusion present in >= MIN_SAMPLES_FOR_GERMLINE_FILTER tumor samples is
+    # unlikely to be a somatic event — treat as germline SV or recurrent artifact.
+    fusion_sample_counts = df.groupby("gene")["sample"].nunique()
+    germline_fusions = fusion_sample_counts[
+        fusion_sample_counts >= MIN_SAMPLES_FOR_GERMLINE_FILTER
+    ].index.tolist()
+    if germline_fusions:
+        log.warning(f"Excluding {len(germline_fusions)} recurrent fusions "
+                    f"(>= {MIN_SAMPLES_FOR_GERMLINE_FILTER} samples) as likely germline/artifact:")
+        for gf in germline_fusions:
+            n = fusion_sample_counts[gf]
+            log.warning(f"  {gf} — found in {n} samples")
+        df = df[~df["gene"].isin(germline_fusions)]
+        log.info(f"After germline filter: {len(df)} peptide records")
     out_tsv = f"{OUT_DIR}/fusions_all.tsv"
     df.to_csv(out_tsv, sep="\t", index=False)
     os.system(f"aws s3 cp '{out_tsv}' '{S3_OUT}/fusions_all.tsv'")

@@ -129,7 +129,7 @@ align_sample() {
         --twopassMode Basic \
         --quantMode GeneCounts \
         --outFileNamePrefix "${STAR_OUTDIR}" \
-        --outBAMsortingThreadN "${RNASEQ_THREADS}"
+        --outBAMsortingThreadN 1
 
     log "${SAMPLE}: STAR alignment complete in $(( SECONDS - T0 ))s."
 
